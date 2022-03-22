@@ -76,13 +76,15 @@ public class MultiplicationTable {
     }
 
     public static void main (String[] args) {
-        System.out.print("Введите размер таблицы умножения(число от 1 до " + MAX_SIZE + "):");
-        Scanner in = new Scanner(System.in);
+
         int size = 0;
         int trial = 10;
         boolean correctInput = false;
+
+        Scanner in = new Scanner(System.in);
         while (trial > 0) {
             try {
+                System.out.print("Введите размер таблицы умножения(число от 1 до " + MAX_SIZE + "):");
                 size = in.nextInt();
             }
             catch (InputMismatchException e) {
@@ -92,14 +94,13 @@ public class MultiplicationTable {
                 catch(Exception ignore) {
                 }
                 System.out.println("Введены некоррекные данные");
-                System.out.print("Введите размер таблицы умножения(число от 1 до " + MAX_SIZE + "):");
                 trial--;
                 continue;
             }
 
             if (size > MAX_SIZE || size < 1) {
                 System.out.println("Введенное число не попадает в требуемый диапазон");
-                System.out.print("Введите размер таблицы умножения(число от 1 до " + MAX_SIZE + "):");
+                // System.out.print("Введите размер таблицы умножения(число от 1 до " + MAX_SIZE + "):");
                 trial--;
                 continue;
             }
@@ -108,7 +109,7 @@ public class MultiplicationTable {
         }
 
         if (!correctInput) {
-            System.out.print("\nВам не удалось ввести корректные данные. Попробуйте позже.");
+            System.out.print("Вам не удалось ввести корректные данные. Попробуйте позже.");
             in.close();
             return;
         }
