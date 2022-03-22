@@ -13,7 +13,7 @@ public class MultiplicationTable {
     private final String table;
 
     private int countOfDigits (int num) {
-        int count = (num == 0) ? 1 : 0;
+        int count = 0;
         while (num != 0) {
             count++;
             num /= 10;
@@ -22,15 +22,7 @@ public class MultiplicationTable {
     }
 
     private String format (int num, int size) {
-        StringBuilder out = new StringBuilder();
-        int count = countOfDigits(num);
-        out.append(" ".repeat(size - count));
-        if (num != 0) {
-            out.append(num);
-        }
-        else
-            out.append(' ');
-        return out.toString();
+        return " ".repeat(size - countOfDigits(num)) + num;
     }
 
     private String separator () {
@@ -50,7 +42,7 @@ public class MultiplicationTable {
         cellsWidth = countOfDigits(size*size);
         firstColWidth = countOfDigits(size);
         StringBuilder tableBuilder = new StringBuilder();
-        tableBuilder.append(format(0, firstColWidth));
+        tableBuilder.append(" ".repeat(firstColWidth));
         for (int j = 1; j <= size; j++) {
             tableBuilder.append('|');
             tableBuilder.append(format(j, cellsWidth));
