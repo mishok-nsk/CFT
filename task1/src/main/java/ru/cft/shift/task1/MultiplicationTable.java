@@ -1,113 +1,34 @@
 package ru.cft.shift.task1;
 
+import java.util.NoSuchElementException;
 import java.util.Scanner;
-import java.util.InputMismatchException;
 
 public class MultiplicationTable {
 
+    private static final int MIN_SIZE = 1;
     private static final int MAX_SIZE = 32;
-
-    private final int size;
-    private final int cellsWidth;
-    private final int firstColWidth;
-    private final String table;
-
-    private int countOfDigits (int num) {
-        int count = 0;
-        while (num != 0) {
-            count++;
-            num /= 10;
-        }
-        return count;
-    }
-
-    private String format (int num, int size) {
-        return " ".repeat(size - countOfDigits(num)) + num;
-    }
-
-    private String separator () {
-        StringBuilder out = new StringBuilder();
-        for (int i = 0; i < size; i++) {
-            int cellWidth = (i == 0) ? firstColWidth : cellsWidth;
-            out.append("-".repeat(cellWidth));
-            out.append('+');
-        }
-        out.append("-".repeat(cellsWidth));
-        out.append("\n");
-        return out.toString();
-    }
-
-    public MultiplicationTable (int initSize) {
-        size = initSize;
-        cellsWidth = countOfDigits(size*size);
-        firstColWidth = countOfDigits(size);
-        StringBuilder tableBuilder = new StringBuilder();
-        tableBuilder.append(" ".repeat(firstColWidth));
-        for (int j = 1; j <= size; j++) {
-            tableBuilder.append('|');
-            tableBuilder.append(format(j, cellsWidth));
-        }
-        tableBuilder.append("\n");
-
-        String separatorString = separator();
-
-        for (int i = 1; i <= size; i++) {
-            tableBuilder.append(separatorString);
-            tableBuilder.append(format(i, firstColWidth));
-            for (int j = 1; j <= size; j++) {
-                tableBuilder.append('|');
-                tableBuilder.append(format(i*j, cellsWidth));
-            }
-            tableBuilder.append("\n");
-        }
-        table = tableBuilder.toString();
-    }
-
-    public String toString () {
-        return table;
-    }
 
     public static void main (String[] args) {
 
-        int size = 0;
-        int trial = 10;
-        boolean correctInput = false;
+        int size;
 
-        Scanner in = new Scanner(System.in);
-        while (trial > 0) {
-            try {
-                System.out.print("Введите размер таблицы умножения(число от 1 до " + MAX_SIZE + "):");
-                size = in.nextInt();
-            }
-            catch (InputMismatchException e) {
-                try {
-                    in.nextLine();
-                }
-                catch(Exception ignore) {
-                }
-                System.out.println("Введены некоррекные данные");
-                trial--;
-                continue;
-            }
-
-            if (size > MAX_SIZE || size < 1) {
-                System.out.println("Введенное число не попадает в требуемый диапазон");
-                // System.out.print("Введите размер таблицы умножения(число от 1 до " + MAX_SIZE + "):");
-                trial--;
-                continue;
-            }
-            correctInput = true;
-            break;
-        }
-
-        if (!correctInput) {
-            System.out.print("Вам не удалось ввести корректные данные. Попробуйте позже.");
-            in.close();
+        try (Scanner in = new Scanner(System.in)) {
+            System.out.print("Введите размер таблицы умножения(число от " + MIN_SIZE + " до " + MAX_SIZE + "):");
+            String input = in.nextLine();
+            size = Integer.parseInt(input);
+        } catch (NoSuchElementException e) {
+            System.out.println("Данные не введены.");
+            return;
+        } catch (NumberFormatException e) {
+            System.out.println("Введены некорректные данные.");
             return;
         }
 
-        MultiplicationTable mt= new MultiplicationTable(size);
-        System.out.println(mt);
-        in.close();
+        if (size > MAX_SIZE || size < MIN_SIZE) {
+            System.out.println("Введенное число не попадает в требуемый диапазон.");
+            return;
+        }
+        TableBuilder tb= new TableBuilder(size);
+        tb.printToConsole();
     }
 }
