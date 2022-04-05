@@ -8,7 +8,7 @@ public class Rectangle extends Figure {
 
     public static Rectangle create(int[] params) {
         if (checkParams(params)) {
-            return new Rectangle(params[0], params[1]);
+            return new Rectangle(params);
         }
         return null;
     }
@@ -23,16 +23,12 @@ public class Rectangle extends Figure {
         return true;
     }
 
-    private Rectangle(int length, int width) {
-        // super();
+    private Rectangle(int[] side) {
         name = NAME;
-        this.length = length;
-        this.width = width;
+        this.length = Math.max(side[0], side[1]);
+        this.width = Math.min(side[0], side[1]);
         calcSquareAndPerimeter();
         diagonal = calcDiagonal();
-        // square = length * width;
-        // perimeter = 2 * (length + width);
-
     }
 
     @Override

@@ -8,7 +8,7 @@ public class Main {
     private static final boolean FILE = true;
     private static final Logger logger = LogManager.getLogger();
     private static String inputFile;
-    private static String outputFile = " ";
+    private static String outputFile = "";
     private static boolean out = false;
 
     private static void parseArguments(String[] arguments) {
@@ -35,10 +35,9 @@ public class Main {
         if (message != null) {
             logger.log(Level.ERROR, message);
         }
-        System.out.println("Ошибка в параметрах.");
-        System.out.println("usage: Main (-c|-f) <input.txt> <output.txt>");
+        logger.log(Level.ERROR, "usage: Main (-c|-f) <input.txt> <output.txt>");
         logger.info("Завершение работы.");
-        System.exit(0);
+        // System.exit(0);
     }
 
     public static void main(String[] args) {
@@ -49,7 +48,8 @@ public class Main {
             logger.info("Чтение данных фигуры из файла.");
             rf = new ReadFigureFromFile(inputFile);
         } catch (Exception e) {
-            error(e.getMessage());
+            logger.error(e.getMessage());
+            logger.info("Завершение работы.");
             return;
         }
 

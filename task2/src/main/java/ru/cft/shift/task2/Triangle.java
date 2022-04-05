@@ -19,7 +19,9 @@ public class Triangle extends Figure {
                 return false;
             }
         }
-        if (1.0 * (params[0] + params[1] + params[2]) / Math.max(params[0], Math.max(params[1], params[2])) <= 2.0) {
+        int maxSide = Math.max(params[0], Math.max(params[1], params[2]));
+        int perimeter = params[0] + params[1] + params[2];
+        if ((1.0 * perimeter / maxSide) <= 2.0) {
             return false;
         }
         return true;

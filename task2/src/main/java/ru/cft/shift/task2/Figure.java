@@ -3,7 +3,6 @@ package ru.cft.shift.task2;
 abstract class Figure {
     protected final static int MAX_VALUE = 1000;
     protected String name;
-    //protected String feature;
     protected double square;
     protected double perimeter;
 
@@ -21,5 +20,13 @@ abstract class Figure {
 
     public String getName() {
         return name;
+    }
+
+    public double getSquare() {
+        return square;
+    }
+
+    public double getPerimeter() {
+        return perimeter;
     }
 }

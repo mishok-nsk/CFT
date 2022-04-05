@@ -41,13 +41,4 @@ public class Circle extends Figure {
     public String getFeature() {
         return super.getFeature() + String.format("Радиус: %d мм%nДиаметр: %d мм", radius, diameter);
     }
-
-    public double getSquare() {
-        return square;
-    }
-
-    public double getPerimeter() {
-        return perimeter;
-    }
-
 }
