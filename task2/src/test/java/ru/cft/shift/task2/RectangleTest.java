@@ -8,31 +8,31 @@ class RectangleTest {
 
     @Test
     public void rectangleNotCreate_IfSideLessThanZero() {
-        int[] side = {50, -50};
+        double[] side = {50, -50};
         Rectangle rc = Rectangle.create(side);
         assertNull(rc);
     }
 
     @Test
     public void rectangleNotCreate_IfSideMoreThanMaxValue() {
-        int[] side = {1050, 800};
+        double[] side = {1050, 800};
         Rectangle rc = Rectangle.create(side);
         assertNull(rc);
     }
 
     @Test
     public void rectangleNotCreate_IfOnlyOneSide() {
-        int[] side = {100};
+        double[] side = {100};
         Rectangle rc = Rectangle.create(side);
         assertNull(rc);
     }
 
     @Test
     void test_RectangleFeature_IfSideCorrect() {
-        int[] side = {150, 345};
+        double[] side = {150, 345};
         Rectangle rc = Rectangle.create(side);
         assertEquals(2 * (side[0] + side[1]), rc.getPerimeter());
-        assertEquals(side[0] * side[1], rc.getSquare());
+        assertEquals(side[0] * side[1], rc.getArea());
         double diagonal = Math.sqrt(side[0] * side[0] + side[1] * side[1]);
         assertEquals(diagonal, rc.getDiagonal());
     }

@@ -1,81 +1,93 @@
 package ru.cft.shift.task2;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class Main {
-    private static final boolean FILE = true;
     private static final Logger logger = LogManager.getLogger();
     private static String inputFile;
-    private static String outputFile = "";
-    private static boolean out = false;
+    private static String outputFile;
+    private static boolean isOutToFile = false;
 
-    private static void parseArguments(String[] arguments) {
-        if (arguments.length == 0) error("Не указаны обязательные аргументы.");
+    private static void parseArguments(String[] arguments) throws FigureParseException {
+        if (arguments.length == 0) {
+            throw new FigureParseException("Не указаны обязательные аргументы.");
+        }
         switch(arguments[0]) {
             case "-c" :
                 break;
             case "-f" :
-                out = FILE;
+                isOutToFile = true;
                 break;
             default :
-                error("Не указан параметр вывода результата.");
+                throw new FigureParseException("Не указан параметр вывода результата.");
         }
 
-        if (arguments.length < 2) error("Не указано имя входного файла с данными.");
+        if (arguments.length < 2) {
+            throw new FigureParseException("Не указано имя входного файла с данными.");
+        }
         inputFile = arguments[1];
 
-        if (out == FILE && arguments.length < 3) error("Не указано имя выходного файла.");
-
-        if (out == FILE) outputFile = arguments[2];
-    }
-
-    private static void error(String message) {
-        if (message != null) {
-            logger.log(Level.ERROR, message);
+        if (isOutToFile && arguments.length < 3) {
+            throw new FigureParseException("Не указано имя выходного файла.");
         }
-        logger.log(Level.ERROR, "usage: Main (-c|-f) <input.txt> <output.txt>");
-        logger.info("Завершение работы.");
-        // System.exit(0);
+
+        if (isOutToFile) outputFile = arguments[2];
     }
 
     public static void main(String[] args) {
-        logger.log(Level.INFO, "Приложение запущено.");
-        parseArguments(args);
-        ReadFigureFromFile rf;
+        logger.info("Приложение запущено.");
         try {
+            parseArguments(args);
             logger.info("Чтение данных фигуры из файла.");
+            ReadFigureFromFile rf;
             rf = new ReadFigureFromFile(inputFile);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            logger.info("Завершение работы.");
-            return;
-        }
-
-        Figure figure;
-        try {
             logger.info("Создаем фигуру.");
+            Figure figure;
             figure = FigureCreator.create(rf.getTypeFigure(), rf.getParams());
-        }
-        catch (Exception e) {
-            logger.info("Фигура не создана: " + e.getMessage());
-            logger.info("Завершение работы.");
-            return;
-        }
-
-        try {
-            logger.info("Вывод параметров фигуры " + figure.getName() + ".");
-            if (out == FILE) {
+            logger.info("Вывод параметров фигуры {} .", figure.getName());
+            if (isOutToFile) {
                 PrintFigure.printToFile(figure, outputFile);
             }
             else {
                 PrintFigure.printToConsole(figure);
             }
         }
+        catch (FigureParseException e) {
+            logger.error(e.getMessage());
+            logger.error("usage: Main (-c|-f) <input.txt> <output.txt>");
+        }
+        catch (FigureReadException e) {
+            logger.error("Ошибка чтения: {}", e.getMessage());
+        }
+        catch (FigureCreateException e) {
+            logger.error("Фигура не создана: {}", e.getMessage());
+        }
         catch(Exception e) {
-            logger.info(e.getMessage());
+            logger.error(e.getMessage());
+        }
+        finally {
             logger.info("Завершение работы.");
         }
+    }
+}
+
+class FigureParseException extends Exception {
+
+    public FigureParseException(String message) {
+        super(message);
+    }
+}
+
+class FigureCreateException extends Exception {
+
+    public FigureCreateException(String message) {
+        super(message);
+    }
+}
+class FigureReadException extends Exception {
+
+    public FigureReadException(String message) {
+        super(message);
     }
 }

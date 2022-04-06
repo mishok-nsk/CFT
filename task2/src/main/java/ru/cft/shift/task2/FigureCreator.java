@@ -2,23 +2,15 @@ package ru.cft.shift.task2;
 
 public class FigureCreator {
 
-    public static Figure create(String type, int[] params) throws Exception {
-        Figure figure;
-        switch(type) {
-            case "CIRCLE" :
-                figure = Circle.create(params[0]);
-                break;
-            case "RECTANGLE" :
-                figure = Rectangle.create(params);
-                break;
-            case "TRIANGLE" :
-                figure = Triangle.create(params);
-                break;
-            default:
-                throw new Exception("Задан некорректный тип фигуры.");
-        }
+    public static Figure create(String type, double[] params) throws FigureCreateException {
+        Figure figure = switch (type) {
+            case "CIRCLE" -> Circle.create(params[0]);
+            case "RECTANGLE" -> Rectangle.create(params);
+            case "TRIANGLE" -> Triangle.create(params);
+            default -> throw new FigureCreateException("Задан некорректный тип фигуры.");
+        };
         if(figure == null) {
-            throw new Exception("Некорректные параметры фигуры.");
+            throw new FigureCreateException("Некорректные параметры фигуры.");
         }
         return figure;
     }

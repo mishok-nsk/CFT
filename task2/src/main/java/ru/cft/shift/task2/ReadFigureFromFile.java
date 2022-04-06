@@ -1,39 +1,32 @@
 package ru.cft.shift.task2;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class ReadFigureFromFile {
     private final String typeFigure;
-    private final int[] params;
+    private final double[] params;
 
-    public ReadFigureFromFile(String file) throws Exception {
-        String stringParams;
+    public ReadFigureFromFile(String file) throws FigureReadException, FileNotFoundException {
         try (Scanner sc = new Scanner(new File(file))) {
-            //typeFigure = sc.nextLine();
+            String stringParams;
             if (sc.hasNextLine()) typeFigure = sc.nextLine();
-            else throw new Exception("Файл пуст.");
+            else throw new FigureReadException("Файл пуст.");
             if (sc.hasNextLine()) stringParams = sc.nextLine();
-            else throw new Exception("Параметры фигуры не заданы.");
-        }
-        catch (Exception e) {
-            //System.out.println(e.getMessage());
-            throw e;
-        }
-
-        String[] stringParamsArr = stringParams.split(" ");
-        int length = stringParamsArr.length;
-        if (length == 0) {
-            throw new Exception("Параметры фигуры не заданы.");
-        }
-        params = new int[length];
-        try {
+            else throw new FigureReadException("Параметры фигуры не заданы.");
+            String[] stringParamsArr = stringParams.split(" ");
+            int length = stringParamsArr.length;
+            if (length == 0) {
+                throw new FigureReadException("Параметры фигуры не заданы.");
+            }
+            params = new double[length];
             for (int i = 0; i < length; i++) {
-                params[i] = Integer.parseInt(stringParamsArr[i]);
+                params[i] = Double.parseDouble(stringParamsArr[i]);
             }
         }
         catch (NumberFormatException e) {
-            throw new Exception("Некорректные параметры фигуры.");
+            throw new FigureReadException("Некорректные параметры фигуры.");
         }
     }
 
@@ -41,7 +34,7 @@ public class ReadFigureFromFile {
         return typeFigure;
     }
 
-    public int[] getParams() {
+    public double[] getParams() {
         return params;
     }
 }

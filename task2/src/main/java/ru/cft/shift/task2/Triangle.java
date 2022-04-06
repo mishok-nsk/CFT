@@ -2,61 +2,64 @@ package ru.cft.shift.task2;
 
 public class Triangle extends Figure {
     private final static String NAME = "Треугольник";
-    private final int[] side = new int[3];
+    private final static String CORNER_UNIT = "град";
+    private final double[] side = new double[3];
     private final double[] corner = new double[3];
 
-    public static Triangle create(int[] params) {
+    public static Triangle create(double[] params) {
         if (checkParams(params)) {
             return new Triangle(params);
         }
         return null;
     }
 
-    private static boolean checkParams(int[] params) {
+    private static boolean checkParams(double[] params) {
         if (params.length < 3) return false;
         for (double p : params) {
             if (p < 0 || p > MAX_VALUE) {
                 return false;
             }
         }
-        int maxSide = Math.max(params[0], Math.max(params[1], params[2]));
-        int perimeter = params[0] + params[1] + params[2];
-        if ((1.0 * perimeter / maxSide) <= 2.0) {
-            return false;
-        }
-        return true;
+
+        // Проверка треугольника на вырожденность. Наибольшая сторона должна быть меньше суммы двух других.
+        double maxSide = Math.max(params[0], Math.max(params[1], params[2]));
+        double perimeter = params[0] + params[1] + params[2];
+        return ((perimeter / maxSide) > 2.0);
     }
 
-    private Triangle(int[] side) {
-        name = NAME;
+    private Triangle(double[] side) {
+        super(NAME);
         System.arraycopy(side, 0, this.side, 0, 3);
-        calcCorner();
-        calcSquareAndPerimeter();
+        calcCorners();
     }
 
     @Override
-    protected void calcSquare() {
-        square = 0.5 * side[1] * side[2] * Math.sin(Math.toRadians(corner[0]));
+    protected double calcArea() {
+        return area = 0.5 * side[1] * side[2] * Math.sin(Math.toRadians(corner[0]));
     }
 
     @Override
-    protected void calcPerimeter() {
-        perimeter =  side[0] + side[1] + side[2];
+    protected double calcPerimeter() {
+        return perimeter =  side[0] + side[1] + side[2];
     }
 
-    private void calcCorner() {
-        double cornerRadian = Math.acos(1.0 * (side[1] * side[1] + side[2] * side[2] - side[0] * side[0]) / (2 * side[1] * side[2]));
+    private void calcCorners() {
+        double cornerRadian = calcCorner(side[1], side[2], side[0]);
         corner[0] =  cornerRadian * 180 / Math.PI;
-        cornerRadian = Math.acos(1.0 * (side[0] * side[0] + side[2] * side[2] - side[1] * side[1]) / (2 * side[0] * side[2]));
+        cornerRadian = calcCorner(side[2], side[0], side[1]);
         corner[1] = cornerRadian * 180 / Math.PI;
         corner[2] = 180 - corner[0] - corner[1];
     }
 
+    private double calcCorner(double side1, double side2, double side3) {
+        return Math.acos((side1 * side1 + side2 * side2 - side3 * side3) / (2 * side1 * side2));
+    }
+
     @Override
     public String getFeature() {
-        return super.getFeature() + String.format("Сторона1: %d мм%nУгол1: %.2f град%n" +
-                "Сторона2: %d мм%nУгол2: %.2f град%nСторона3: %d мм%nУгол3: %.2f град",
-                side[0], corner[0], side[1], corner[1], side[2], corner[2]);
+        return super.getFeature() + String.format("Сторона1: %.0f %7$s %nУгол1: %.2f %8$s %n" +
+                "Сторона2: %.0f %7$s %nУгол2: %.2f %8$s %nСторона3: %.0f %7$s %nУгол3: %.2f %s",
+                side[0], corner[0], side[1], corner[1], side[2], corner[2], LENGTH_UNIT, CORNER_UNIT);
     }
 
     public double[] getCorner() {

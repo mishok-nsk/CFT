@@ -2,20 +2,20 @@ package ru.cft.shift.task2;
 
 public class Rectangle extends Figure {
     private final static String NAME = "Прямоугольник";
-    private final int length;
-    private final int width;
+    private final double length;
+    private final double width;
     private final double diagonal;
 
-    public static Rectangle create(int[] params) {
+    public static Rectangle create(double[] params) {
         if (checkParams(params)) {
             return new Rectangle(params);
         }
         return null;
     }
 
-    private static boolean checkParams(int[] params) {
+    private static boolean checkParams(double[] params) {
         if (params.length < 2) return false;
-        for (int p : params) {
+        for (double p : params) {
             if (p < 0 || p > MAX_VALUE) {
                 return false;
             }
@@ -23,22 +23,21 @@ public class Rectangle extends Figure {
         return true;
     }
 
-    private Rectangle(int[] side) {
-        name = NAME;
+    private Rectangle(double[] side) {
+        super(NAME);
         this.length = Math.max(side[0], side[1]);
         this.width = Math.min(side[0], side[1]);
-        calcSquareAndPerimeter();
         diagonal = calcDiagonal();
     }
 
     @Override
-    protected void calcSquare() {
-        square = length * width;
+    protected double calcArea() {
+        return area = length * width;
     }
 
     @Override
-    protected void calcPerimeter() {
-        perimeter = 2 * (length + width);
+    protected double calcPerimeter() {
+        return perimeter = 2 * (length + width);
     }
 
     private double calcDiagonal() {
@@ -48,9 +47,7 @@ public class Rectangle extends Figure {
     @Override
     public String getFeature() {
         return super.getFeature() +
-                "Длина: " + length + "мм\n" +
-                "Ширина: " + width + "мм\n" +
-                String.format("Диагональ: %.2f мм", diagonal);
+                String.format("Длина: %.0f %4$s %nШирина: %.0f %4$s %nДиагональ: %.2f %s", length, width, diagonal, LENGTH_UNIT);
     }
 
     public double getDiagonal() {

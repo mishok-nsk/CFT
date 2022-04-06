@@ -1,32 +1,40 @@
 package ru.cft.shift.task2;
 
 abstract class Figure {
-    protected final static int MAX_VALUE = 1000;
-    protected String name;
-    protected double square;
+    protected final static double MAX_VALUE = 1000;
+    protected final static String LENGTH_UNIT = "мм";
+    protected final static String AREA_UNIT = "кв.мм";
+    protected final String name;
+    protected double area;
     protected double perimeter;
 
-    protected void calcSquareAndPerimeter() {
-        calcSquare();
-        calcPerimeter();
+    public Figure(String name) {
+        this.name = name;
     }
-
-    protected abstract void calcSquare();
-    protected abstract void calcPerimeter();
-
     public String getFeature() {
-        return String.format("Тип фигуры: %s %nПлощадь: %.2f кв.мм %nПериметр: %.2f мм %n", name, square, perimeter);
+        area = calcArea();
+        perimeter = calcPerimeter();
+        return String.format("Тип фигуры: %s %nПлощадь: %.2f %s %nПериметр: %.2f %s %n", name, area, AREA_UNIT, perimeter, LENGTH_UNIT);
     }
-
     public String getName() {
         return name;
     }
 
-    public double getSquare() {
-        return square;
+    public double getArea() {
+        if (area == 0) {
+            area = calcArea();
+        }
+        return area;
     }
 
     public double getPerimeter() {
+        if (perimeter == 0) {
+            perimeter = calcPerimeter();
+        }
         return perimeter;
     }
+
+    protected abstract double calcArea();
+
+    protected abstract double calcPerimeter();
 }
