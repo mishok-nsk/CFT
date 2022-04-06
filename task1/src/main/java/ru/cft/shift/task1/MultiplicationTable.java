@@ -16,19 +16,16 @@ public class MultiplicationTable {
             System.out.print("Введите размер таблицы умножения(число от " + MIN_SIZE + " до " + MAX_SIZE + "):");
             String input = in.nextLine();
             size = Integer.parseInt(input);
+            if (size > MAX_SIZE || size < MIN_SIZE) {
+                System.out.println("Введенное число не попадает в требуемый диапазон.");
+                return;
+            }
+            TableBuilder tb= new TableBuilder(size);
+            tb.printToConsole();
         } catch (NoSuchElementException e) {
             System.out.println("Данные не введены.");
-            return;
         } catch (NumberFormatException e) {
             System.out.println("Введены некорректные данные.");
-            return;
         }
-
-        if (size > MAX_SIZE || size < MIN_SIZE) {
-            System.out.println("Введенное число не попадает в требуемый диапазон.");
-            return;
-        }
-        TableBuilder tb= new TableBuilder(size);
-        tb.printToConsole();
     }
 }
