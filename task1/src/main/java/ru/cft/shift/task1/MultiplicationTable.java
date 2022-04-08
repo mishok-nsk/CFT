@@ -8,15 +8,13 @@ public class MultiplicationTable {
     private static final int MIN_SIZE = 1;
     private static final int MAX_SIZE = 32;
 
-    public static void main (String[] args) {
-
+    public static void main(String[] args) {
         int size;
-
         try (Scanner in = new Scanner(System.in)) {
             System.out.print("Введите размер таблицы умножения(число от " + MIN_SIZE + " до " + MAX_SIZE + "):");
             String input = in.nextLine();
             size = Integer.parseInt(input);
-            if (size > MAX_SIZE || size < MIN_SIZE) {
+            if ((size > MAX_SIZE) || (size < MIN_SIZE)) {
                 System.out.println("Введенное число не попадает в требуемый диапазон.");
                 return;
             }
