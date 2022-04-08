@@ -31,9 +31,9 @@ class RectangleTest {
     void test_RectangleFeature_IfSideCorrect() {
         double[] side = {150, 345};
         Rectangle rc = Rectangle.create(side);
-        assertEquals(2 * (side[0] + side[1]), rc.getPerimeter());
-        assertEquals(side[0] * side[1], rc.getArea());
+        assertEquals(2 * (side[0] + side[1]), rc.getPerimeter(), "Test rectangle perimeter calculate");
+        assertEquals(side[0] * side[1], rc.getArea(), "Test rectangle area calculate");
         double diagonal = Math.sqrt(side[0] * side[0] + side[1] * side[1]);
-        assertEquals(diagonal, rc.getDiagonal());
+        assertEquals(diagonal, rc.getDiagonal(), "Test rectangle diagonal calculate");
     }
 }

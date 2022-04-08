@@ -21,10 +21,10 @@ class CircleTest {
     }
 
     @Test
-    void test_PerimeterAndSquare_IfRadiusCorrect() {
+    void test_PerimeterAndArea_IfRadiusCorrect() {
         double radius = 456;
         Circle cr = Circle.create(radius);
-        assertEquals(2 * Math.PI * radius, cr.getPerimeter());
-        assertEquals(Math.PI * radius * radius, cr.getArea());
+        assertEquals(2 * Math.PI * radius, cr.getPerimeter(), "Test circle perimeter calculate");
+        assertEquals(Math.PI * radius * radius, cr.getArea(), "Test circle area calculate");
     }
 }

@@ -16,7 +16,7 @@ public class Rectangle extends Figure {
     private static boolean checkParams(double[] params) {
         if (params.length < 2) return false;
         for (double p : params) {
-            if (p < 0 || p > MAX_VALUE) {
+            if ((p < 0) || (p > MAX_VALUE)) {
                 return false;
             }
         }

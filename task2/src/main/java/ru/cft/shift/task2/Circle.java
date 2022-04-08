@@ -13,7 +13,7 @@ public class Circle extends Figure {
     }
 
     private static boolean checkParams(double radius) {
-        return radius > 0 && radius < MAX_VALUE;
+        return (radius > 0) && (radius < MAX_VALUE);
     }
 
     private Circle(double radius) {

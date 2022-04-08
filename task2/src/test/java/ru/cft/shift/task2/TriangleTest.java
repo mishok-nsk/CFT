@@ -38,9 +38,9 @@ class TriangleTest {
     void test_RectangleFeature_IfSideCorrect() {
         double[] side = {150, 345, 250};
         Triangle tr = Triangle.create(side);
-        assertEquals(side[0] + side[1] + side[2], tr.getPerimeter());
-        double[] corners = tr.getCorner();
-        double square = 0.5 * side[1] * side[2] * Math.sin(Math.toRadians(corners[0]));
-        assertEquals(square, tr.getArea());
+        assertEquals(side[0] + side[1] + side[2], tr.getPerimeter(), "Test triangle perimeter calculate");
+        double[] angles = tr.getAngles();
+        double area = 0.5 * side[1] * side[2] * Math.sin(Math.toRadians(angles[0]));
+        assertEquals(area, tr.getArea(), "Test triangle area calculate");
       }
 }

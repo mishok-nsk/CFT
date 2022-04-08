@@ -48,25 +48,19 @@ public class Main {
             logger.info("Вывод параметров фигуры {} .", figure.getName());
             if (isOutToFile) {
                 PrintFigure.printToFile(figure, outputFile);
-            }
-            else {
+            } else {
                 PrintFigure.printToConsole(figure);
             }
-        }
-        catch (FigureParseException e) {
+        } catch (FigureParseException e) {
             logger.error(e.getMessage());
             logger.error("usage: Main (-c|-f) <input.txt> <output.txt>");
-        }
-        catch (FigureReadException e) {
+        } catch (FigureReadException e) {
             logger.error("Ошибка чтения: {}", e.getMessage());
-        }
-        catch (FigureCreateException e) {
+        } catch (FigureCreateException e) {
             logger.error("Фигура не создана: {}", e.getMessage());
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             logger.error(e.getMessage());
-        }
-        finally {
+        } finally {
             logger.info("Завершение работы.");
         }
     }

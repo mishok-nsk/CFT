@@ -4,7 +4,7 @@ public class Triangle extends Figure {
     private final static String NAME = "Треугольник";
     private final static String CORNER_UNIT = "град";
     private final double[] side = new double[3];
-    private final double[] corner = new double[3];
+    private final double[] angle = new double[3];
 
     public static Triangle create(double[] params) {
         if (checkParams(params)) {
@@ -16,7 +16,7 @@ public class Triangle extends Figure {
     private static boolean checkParams(double[] params) {
         if (params.length < 3) return false;
         for (double p : params) {
-            if (p < 0 || p > MAX_VALUE) {
+            if ((p < 0) || (p > MAX_VALUE)) {
                 return false;
             }
         }
@@ -35,7 +35,7 @@ public class Triangle extends Figure {
 
     @Override
     protected double calcArea() {
-        return area = 0.5 * side[1] * side[2] * Math.sin(Math.toRadians(corner[0]));
+        return area = 0.5 * side[1] * side[2] * Math.sin(Math.toRadians(angle[0]));
     }
 
     @Override
@@ -44,14 +44,14 @@ public class Triangle extends Figure {
     }
 
     private void calcCorners() {
-        double cornerRadian = calcCorner(side[1], side[2], side[0]);
-        corner[0] =  cornerRadian * 180 / Math.PI;
-        cornerRadian = calcCorner(side[2], side[0], side[1]);
-        corner[1] = cornerRadian * 180 / Math.PI;
-        corner[2] = 180 - corner[0] - corner[1];
+        double cornerRadian = calcAngle(side[1], side[2], side[0]);
+        angle[0] =  cornerRadian * 180 / Math.PI;
+        cornerRadian = calcAngle(side[2], side[0], side[1]);
+        angle[1] = cornerRadian * 180 / Math.PI;
+        angle[2] = 180 - angle[0] - angle[1];
     }
 
-    private double calcCorner(double side1, double side2, double side3) {
+    private double calcAngle(double side1, double side2, double side3) {
         return Math.acos((side1 * side1 + side2 * side2 - side3 * side3) / (2 * side1 * side2));
     }
 
@@ -59,10 +59,10 @@ public class Triangle extends Figure {
     public String getFeature() {
         return super.getFeature() + String.format("Сторона1: %.0f %7$s %nУгол1: %.2f %8$s %n" +
                 "Сторона2: %.0f %7$s %nУгол2: %.2f %8$s %nСторона3: %.0f %7$s %nУгол3: %.2f %s",
-                side[0], corner[0], side[1], corner[1], side[2], corner[2], LENGTH_UNIT, CORNER_UNIT);
+                side[0], angle[0], side[1], angle[1], side[2], angle[2], LENGTH_UNIT, CORNER_UNIT);
     }
 
-    public double[] getCorner() {
-        return corner;
+    public double[] getAngles() {
+        return angle;
     }
 }

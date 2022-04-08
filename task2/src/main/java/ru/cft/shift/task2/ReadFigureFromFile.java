@@ -24,8 +24,7 @@ public class ReadFigureFromFile {
             for (int i = 0; i < length; i++) {
                 params[i] = Double.parseDouble(stringParamsArr[i]);
             }
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw new FigureReadException("Некорректные параметры фигуры.");
         }
     }

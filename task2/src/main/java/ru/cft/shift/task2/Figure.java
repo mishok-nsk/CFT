@@ -16,18 +16,18 @@ abstract class Figure {
         perimeter = calcPerimeter();
         return String.format("Тип фигуры: %s %nПлощадь: %.2f %s %nПериметр: %.2f %s %n", name, area, AREA_UNIT, perimeter, LENGTH_UNIT);
     }
-    public String getName() {
+    String getName() {
         return name;
     }
 
-    public double getArea() {
+    double getArea() {
         if (area == 0) {
             area = calcArea();
         }
         return area;
     }
 
-    public double getPerimeter() {
+    double getPerimeter() {
         if (perimeter == 0) {
             perimeter = calcPerimeter();
         }
