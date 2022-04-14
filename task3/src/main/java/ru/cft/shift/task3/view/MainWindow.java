@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import ru.cft.shift.task3.model.OpenCellListener;
 
 public class MainWindow extends JFrame {
     private final Container contentPane;
@@ -191,5 +192,9 @@ public class MainWindow extends JFrame {
         gbc.weightx = 0.1;
         mainLayout.setConstraints(label, gbc);
         contentPane.add(label);
+    }
+
+    public void cellOpen(int x, int y, int bomb) {
+        setCellImage(x, y, GameImage.EMPTY);
     }
 }

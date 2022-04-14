@@ -1,5 +1,7 @@
 package ru.cft.shift.task3.app;
 
+import ru.cft.shift.task3.controller.GameController;
+import ru.cft.shift.task3.model.GameModel;
 import ru.cft.shift.task3.view.*;
 
 public class Application {
@@ -7,13 +9,16 @@ public class Application {
         MainWindow mainWindow = new MainWindow();
         SettingsWindow settingsWindow = new SettingsWindow(mainWindow);
         HighScoresWindow highScoresWindow = new HighScoresWindow(mainWindow);
-
-        mainWindow.setNewGameMenuAction(e -> { /* TODO */ });
+        GameModel gameModel = new GameModel(10, 10);
+        GameController gameController = new GameController(gameModel);
+        mainWindow.setNewGameMenuAction(gameController);
         mainWindow.setSettingsMenuAction(e -> settingsWindow.setVisible(true));
         mainWindow.setHighScoresMenuAction(e -> highScoresWindow.setVisible(true));
         mainWindow.setExitMenuAction(e -> mainWindow.dispose());
-        mainWindow.setCellListener((x, y, buttonType) -> { /* TODO */ });
+        mainWindow.setCellListener((x, y, buttonType) -> gameController.onMouseClick(x, y, buttonType));
 
+        gameModel.setNewGameListener((row, col) -> mainWindow.createGameField(row, col));
+        gameModel.setOpenCellListener((x, y, bomb) -> mainWindow.setCellImage(x, y, GameImage.EMPTY));
         mainWindow.createGameField(10, 10);
         mainWindow.setVisible(true);
 
