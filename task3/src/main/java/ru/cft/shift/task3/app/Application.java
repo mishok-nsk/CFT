@@ -9,7 +9,7 @@ public class Application {
         MainWindow mainWindow = new MainWindow();
         SettingsWindow settingsWindow = new SettingsWindow(mainWindow);
         HighScoresWindow highScoresWindow = new HighScoresWindow(mainWindow);
-        GameModel gameModel = new GameModel(10, 10);
+        GameModel gameModel = new GameModel(9, 9, 9);
         GameController gameController = new GameController(gameModel);
         mainWindow.setNewGameMenuAction(gameController);
         mainWindow.setSettingsMenuAction(e -> settingsWindow.setVisible(true));
@@ -18,7 +18,15 @@ public class Application {
         mainWindow.setCellListener((x, y, buttonType) -> gameController.onMouseClick(x, y, buttonType));
 
         gameModel.setNewGameListener((row, col) -> mainWindow.createGameField(row, col));
-        gameModel.setOpenCellListener((x, y, bomb) -> mainWindow.setCellImage(x, y, GameImage.EMPTY));
+        gameModel.setOpenCellListener((x, y, value) -> mainWindow.setCellImage(x, y, GameImage.EMPTY));
+        gameModel.setFlagCellListener((x, y) -> {
+            if (mainWindow.isCellMarked(x, y)) {
+                mainWindow.setCellImage(x, y, GameImage.CLOSED);
+            } else {
+                mainWindow.setCellImage(x, y, GameImage.MARKED);
+            }
+        });
+
         mainWindow.createGameField(10, 10);
         mainWindow.setVisible(true);
 

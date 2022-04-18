@@ -5,7 +5,6 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import ru.cft.shift.task3.model.OpenCellListener;
 
 public class MainWindow extends JFrame {
     private final Container contentPane;
@@ -73,6 +72,10 @@ public class MainWindow extends JFrame {
 
     public void setCellImage(int x, int y, GameImage gameImage) {
         cellButtons[y][x].setIcon(gameImage.getImageIcon());
+    }
+
+    public boolean isCellMarked(int x, int y) {
+        return cellButtons[y][x].getIcon() == GameImage.MARKED.getImageIcon();
     }
 
     public void setBombsCount(int bombsCount) {
@@ -192,9 +195,5 @@ public class MainWindow extends JFrame {
         gbc.weightx = 0.1;
         mainLayout.setConstraints(label, gbc);
         contentPane.add(label);
-    }
-
-    public void cellOpen(int x, int y, int bomb) {
-        setCellImage(x, y, GameImage.EMPTY);
     }
 }

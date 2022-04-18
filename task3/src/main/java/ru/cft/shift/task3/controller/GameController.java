@@ -18,6 +18,8 @@ public class GameController implements ActionListener {
     public void onMouseClick(int x, int y, ButtonType buttonType) {
         if (buttonType == ButtonType.LEFT_BUTTON) {
             gameModel.openCell(x, y);
+        } else if (buttonType == ButtonType.RIGHT_BUTTON) {
+            gameModel.flaggingCell(x, y);
         }
     }
 
