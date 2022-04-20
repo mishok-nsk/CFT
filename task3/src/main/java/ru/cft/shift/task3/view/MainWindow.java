@@ -20,6 +20,8 @@ public class MainWindow extends JFrame {
     private JButton[][] cellButtons;
     private JLabel timerLabel;
     private JLabel bombsCounterLabel;
+    private Timer timer;
+    private int gameTime;
 
     public MainWindow() {
         super("Miner");
@@ -33,7 +35,14 @@ public class MainWindow extends JFrame {
         contentPane.setLayout(mainLayout);
 
         contentPane.setBackground(new Color(144, 158, 184));
+        timer = new Timer(1000, e -> incrementTimerLabel());
     }
+
+    private void incrementTimerLabel() {
+        gameTime++;
+        setTimerValue(gameTime);
+    }
+
 
     private void createMenu() {
         JMenuBar menuBar = new JMenuBar();
@@ -74,10 +83,6 @@ public class MainWindow extends JFrame {
         cellButtons[y][x].setIcon(gameImage.getImageIcon());
     }
 
-    public boolean isCellMarked(int x, int y) {
-        return cellButtons[y][x].getIcon() == GameImage.MARKED.getImageIcon();
-    }
-
     public void setBombsCount(int bombsCount) {
         bombsCounterLabel.setText(String.valueOf(bombsCount));
     }
@@ -88,6 +93,7 @@ public class MainWindow extends JFrame {
 
     public void createGameField(int rowsCount, int colsCount) {
         contentPane.removeAll();
+        gameTime = 0;
         setPreferredSize(new Dimension(20 * colsCount + 70, 20 * rowsCount + 110));
 
         addButtonsPanel(createButtonsPanel(rowsCount, colsCount));
@@ -97,6 +103,14 @@ public class MainWindow extends JFrame {
         addBombCounterImage();
         pack();
         setLocationRelativeTo(null);
+    }
+
+    public void startTimer() {
+        timer.start();
+    }
+
+    public void stopTimer() {
+        timer.stop();
     }
 
     private JPanel createButtonsPanel(int numberOfRows, int numberOfCols) {
@@ -123,10 +137,10 @@ public class MainWindow extends JFrame {
                                 listener.onMouseClick(x, y, ButtonType.LEFT_BUTTON);
                                 break;
                             case MouseEvent.BUTTON2:
-                                listener.onMouseClick(x, y, ButtonType.RIGHT_BUTTON);
+                                listener.onMouseClick(x, y, ButtonType.MIDDLE_BUTTON);
                                 break;
                             case MouseEvent.BUTTON3:
-                                listener.onMouseClick(x, y, ButtonType.MIDDLE_BUTTON);
+                                listener.onMouseClick(x, y, ButtonType.RIGHT_BUTTON);
                                 break;
                             default:
                                 // Other mouse buttons are ignored

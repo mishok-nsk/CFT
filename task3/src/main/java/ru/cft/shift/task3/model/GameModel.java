@@ -1,81 +1,126 @@
 package ru.cft.shift.task3.model;
 
-
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ru.cft.shift.task3.view.GameType;
+
 public class GameModel {
+    private static final Logger logger = LoggerFactory.getLogger(GameModel.class);
     public static final int BOMB = 9;
     public static final int EMPTY = 0;
     private final int row;
     private final int col;
-    private final int mineNumber;
+    private final int bombCount;
+    private final GameType gameType;
     private int mineLeft;
-    private boolean isFieldFilled = false;
-    // private int[][] cells;
-    private CellContext[][] cells;
-    private OpenCellListener openCellListener;
-    private FlagCellListener flagCellListener;
-    private NewGameListener newGameListener;
+    private int cellsClosed;
+    private boolean isFieldFilled;
+    private final CellContext[][] cells;
+    private GameListener listener;
 
-    public GameModel(int row, int col, int mineNumber) {
-        this.row = row;
-        this.col = col;
-        this.mineNumber = mineNumber;
-        mineLeft = mineNumber;
-        // cells = new int[row][col];
+    public GameModel(GameType gameType) {
+        this.gameType = gameType;
+        row = gameType.getRow();
+        col = gameType.getCol();
+        logger.info("инициализируем игровую модель размером {} на {} .", row, col);
+        bombCount = gameType.getBombCount();
         cells = new CellContext[row][col];
+        initCells();
+        // newGame();
     }
 
-    public void setOpenCellListener(OpenCellListener listener) {
-        openCellListener = listener;
-    }
-
-    public void setFlagCellListener(FlagCellListener listener) {
-        flagCellListener = listener;
-    }
-
-    public void setNewGameListener(NewGameListener listener) {
-        newGameListener = listener;
+    public void setGameListener(GameListener listener) {
+        this.listener = listener;
     }
 
     public void newGame() {
-        newGameListener.startNewGame(row, col);
+        initCells();
+        listener.fireEvent(new NewGameEvent(gameType));
     }
 
-    public void openCell(int x, int y) {
+    public void openCells(int x, int y) {
         if (!isFieldFilled) {
             fillField(x, y);
         }
         if (cells[y][x].openCell()) {
-            int value = cells[y][x].getValue();
-            openCellListener.cellOpen(x, y, value);
+            int value = openCell(x, y);
             if (value == BOMB) openAll();
             if (value == EMPTY) openNeighbours(x, y);
+        }
+        if (cellsClosed == bombCount) {
+            listener.fireEvent(new GameEvent(GameEvent.YOU_WIN));
+        }
+    }
+
+    public void openNeighboursWithCheck(int x, int y) {
+        if (!cells[y][x].cellState.getClass().equals(OpenCell.class)) {
+            return;
+        }
+        List<Coordinate> neighbours = getNeighbours(x, y);
+        if (cells[y][x].getValue() == neighbours.stream().filter(this::isMarked).count()) {
+            neighbours.forEach(this::openCellCoordinate);
         }
     }
 
     public void flaggingCell(int x, int y) {
-        if (cells[y][x].flaggingCell()) {
-            flagCellListener.cellFlagging(x, y);
+        if (cells[y][x].markedCell()) {
+            boolean isMarked = cells[y][x].cellState.getClass().equals(MarkedCell.class);
+            if (isMarked) {
+                listener.fireEvent(new MarkedCellEvent(GameEvent.MARKED_CELL, x, y, --mineLeft));
+            } else {
+                listener.fireEvent(new MarkedCellEvent(GameEvent.UNMARKED_CELL, x, y, ++mineLeft));
+            }
+            logger.info("Ячейка [{}] [{}] помечена флагом: {}", x, y, isMarked);
         }
+    }
+
+    private boolean isMarked(Coordinate coord) {
+        return cells[coord.y][coord.x].cellState.getClass().equals(MarkedCell.class);
+    }
+
+    private void openNeighbours(int x, int y) {
+        getNeighbours(x, y).forEach(this::openCellCoordinate);
+    }
+
+    private void openCellCoordinate(Coordinate coord) {
+        openCells(coord.x, coord.y);
+    }
+
+    private int openCell(int x, int y) {
+        cellsClosed--;
+        int value = cells[y][x].getValue();
+        logger.info("Открываем ячейку [{}] [{}] значение {}.", x, y, value);
+        listener.fireEvent(new OpenCellEvent(x, y, value));
+        return value;
     }
 
     private void fillField(int xInit, int yInit) {
+        logger.info("Заполняем игровое поле.");
         isFieldFilled = true;
-        initCells();
         Random rand = new Random();
-
-        for (int i = 0; i < mineNumber; i++) {
+        int mineCounter = 0;
+        while (mineCounter < bombCount) {
             int x, y;
             y = rand.nextInt(row);
             x = rand.nextInt(col);
-            cells[y][x].setValue(BOMB);
-            incrementNeighbours(x, y);
+            if (!(x == xInit && y == yInit) && !(cells[y][x].getValue() == BOMB)) {
+                mineCounter++;
+                cells[y][x].setValue(BOMB);
+                logger.info("Ставим мину {} на ячейку [{}] [{}].", mineCounter, x, y);
+                incrementNeighbours(x, y);
+            }
         }
+        listener.fireEvent(new GameEvent(GameEvent.START_GAME));
     }
 
     private void initCells() {
+        isFieldFilled = false;
+        mineLeft = bombCount;
+        cellsClosed = row * col;
         for (int x = 0; x < col; x++) {
             for (int y = 0; y < row; y++) {
                 cells[y][x] = new CellContext();
@@ -84,67 +129,56 @@ public class GameModel {
     }
 
     private void incrementNeighbours(int x, int y) {
-        Iterator<Coordinate> it = neighbours(x, y);
-        while(it.hasNext()) {
-            Coordinate coord = it.next();
-            if (cells[coord.x][coord.y].getValue() != BOMB) {
-                cells[coord.y][coord.x].incrementValue();
-            }
+        // changeNeighbours(x, y, this::incrementNeighbourValue);
+        getNeighbours(x, y).forEach(this::incrementNeighbourValue);
+
+    }
+    private void incrementNeighbourValue(Coordinate coord) {
+        if (cells[coord.y][coord.x].getValue() != BOMB) {
+            cells[coord.y][coord.x].incrementValue();
         }
     }
+
     private void openAll() {
         for (int x = 0; x < col; x++) {
             for (int y = 0; y < row; y++) {
                 openCell(x, y);
             }
         }
+        listener.fireEvent(new GameEvent(GameEvent.YOU_LOSE));
     }
 
-    private void openNeighbours(int x, int y) {
-        Iterator<Coordinate> it = neighbours(x, y);
-        while(it.hasNext()) {
-            Coordinate coord = it.next();
-            openCell(coord.x, coord.y);
+    private List<Coordinate> getNeighbours(int xInit, int yInit) {
+        List<Coordinate> list = new ArrayList<>(8);
+        for(int x = xInit - 1; x < xInit + 2; x++) {
+                for (int y = yInit - 1; y < yInit +2; y++) {
+                    if (x >= 0 && y >= 0 && x < col && y < row && !(x == xInit && y == yInit)) {
+                        list.add(new Coordinate(x, y));
+                    }
+                }
+            }
+        return list;
+    }
+
+    static class Coordinate {
+        int x;
+        int y;
+
+        Coordinate(int x, int y) {
+            this.x = x;
+            this.y = y;
         }
     }
 
-    private Iterator<Coordinate> neighbours(int x, int y) {
-        return new Iterator<Coordinate>() {
-            int step;
-
-            @Override
-            public boolean hasNext() {
-                return (step < 9);
-            }
-
-            @Override
-            public Coordinate next() {
-                Coordinate coord = new Coordinate();
-                coord.x = step % 3 + (x - 1);
-                coord.y = step / 3 + (y - 1);
-                step++;
-                if (step == 5) { // пропускаем ячейку с координатами равными исходным
-                    return next();
-                }
-                return coord;
-            }
-        };
-    }
-
-    class Coordinate {
-        int x;
-        int y;
-    }
-
-    abstract class Cell {
+    abstract static class Cell {
         int value;
         protected Cell(int value) {
             this.value = value;
         }
         abstract boolean isCanOpened();
-        abstract boolean isCanFlagged();
+        abstract boolean isCanMarked();
         abstract Cell openCell();
-        abstract Cell flaggingCell();
+        abstract Cell markedCell();
     }
 
     class CloseCell extends Cell {
@@ -158,7 +192,7 @@ public class GameModel {
         }
 
         @Override
-        boolean isCanFlagged() {
+        boolean isCanMarked() {
             return true;
         }
 
@@ -168,13 +202,12 @@ public class GameModel {
         }
 
         @Override
-        Cell flaggingCell() {
-            mineLeft--;
-            return new FlaggedCell(value);
+        Cell markedCell() {
+            return new MarkedCell(value);
         }
     }
 
-    class OpenCell extends Cell {
+    static class OpenCell extends Cell {
         OpenCell(int value) {
             super(value);
         }
@@ -185,7 +218,7 @@ public class GameModel {
         }
 
         @Override
-        boolean isCanFlagged() {
+        boolean isCanMarked() {
             return false;
         }
 
@@ -193,13 +226,13 @@ public class GameModel {
             return this;
         }
 
-        Cell flaggingCell() {
+        Cell markedCell() {
             return this;
         }
     }
 
-    class FlaggedCell extends Cell {
-        FlaggedCell(int value) {
+    class MarkedCell extends Cell {
+        MarkedCell(int value) {
             super(value);
         }
 
@@ -209,7 +242,7 @@ public class GameModel {
         }
 
         @Override
-        boolean isCanFlagged() {
+        boolean isCanMarked() {
             return true;
         }
 
@@ -217,8 +250,7 @@ public class GameModel {
             return this;
         }
 
-        Cell flaggingCell() {
-            mineLeft++;
+        Cell markedCell() {
             return new CloseCell(value);
         }
     }
@@ -238,9 +270,9 @@ public class GameModel {
             return false;
         }
 
-        public boolean flaggingCell() {
-            if (cellState.isCanFlagged()) {
-                cellState  = cellState.flaggingCell();
+        public boolean markedCell() {
+            if (cellState.isCanMarked()) {
+                cellState  = cellState.markedCell();
                 return true;
             }
             return false;

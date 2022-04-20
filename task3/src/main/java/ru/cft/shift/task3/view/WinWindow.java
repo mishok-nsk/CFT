@@ -24,7 +24,7 @@ public class WinWindow extends JDialog {
         setResizable(false);
         pack();
         setLocationRelativeTo(null);
-        setVisible(true);
+        setVisible(false);
     }
 
     public void setNewGameListener(ActionListener newGameListener) {
@@ -49,7 +49,7 @@ public class WinWindow extends JDialog {
     }
 
     private JButton createNewGameButton(GridBagLayout layout) {
-        JButton newGameButton = new JButton("New game");
+        JButton newGameButton = new JButton("New Game");
         newGameButton.setPreferredSize(new Dimension(100, 25));
 
         newGameButton.addActionListener(e -> {
