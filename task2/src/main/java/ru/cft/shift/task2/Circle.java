@@ -5,11 +5,11 @@ public class Circle extends Figure {
     private final double radius;
     private final double diameter;
 
-    public static Circle create(double radius) {
-        if (checkParams(radius)) {
-            return new Circle(radius);
+    public static Circle create(double radius) throws FigureCreateException {
+        if (!checkParams(radius)) {
+            throw new FigureCreateException("Некорректные параметры фигуры.");
         }
-        return null;
+        return new Circle(radius);
     }
 
     private static boolean checkParams(double radius) {

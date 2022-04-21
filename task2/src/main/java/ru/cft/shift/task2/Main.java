@@ -65,23 +65,3 @@ public class Main {
         }
     }
 }
-
-class FigureParseException extends Exception {
-
-    public FigureParseException(String message) {
-        super(message);
-    }
-}
-
-class FigureCreateException extends Exception {
-
-    public FigureCreateException(String message) {
-        super(message);
-    }
-}
-class FigureReadException extends Exception {
-
-    public FigureReadException(String message) {
-        super(message);
-    }
-}

@@ -7,10 +7,10 @@ public class Triangle extends Figure {
     private final double[] angle = new double[3];
 
     public static Triangle create(double[] params) {
-        if (checkParams(params)) {
-            return new Triangle(params);
+        if (!checkParams(params)) {
+            throw new FigureCreateException("Некорректные параметры фигуры.");
         }
-        return null;
+        return new Triangle(params);
     }
 
     private static boolean checkParams(double[] params) {

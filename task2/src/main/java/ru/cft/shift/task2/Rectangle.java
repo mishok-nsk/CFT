@@ -7,16 +7,16 @@ public class Rectangle extends Figure {
     private final double diagonal;
 
     public static Rectangle create(double[] params) {
-        if (checkParams(params)) {
-            return new Rectangle(params);
+        if (!checkParams(params)) {
+            throw new FigureCreateException("Некорректные параметры фигуры.");
         }
-        return null;
+        return new Rectangle(params);
     }
 
     private static boolean checkParams(double[] params) {
         if (params.length < 2) return false;
         for (double p : params) {
-            if ((p < 0) || (p > MAX_VALUE)) {
+            if ((p <= 0) || (p > MAX_VALUE)) {
                 return false;
             }
         }
