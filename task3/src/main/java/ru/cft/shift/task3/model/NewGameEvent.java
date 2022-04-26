@@ -1,6 +1,6 @@
 package ru.cft.shift.task3.model;
 
-import ru.cft.shift.task3.view.GameType;
+import ru.cft.shift.task3.app.GameType;
 
 public class NewGameEvent extends GameEvent {
 

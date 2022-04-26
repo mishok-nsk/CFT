@@ -1,9 +1,11 @@
 package ru.cft.shift.task3.view;
 
+import ru.cft.shift.task3.model.HighScoreListener;
+
 import javax.swing.*;
 import java.awt.*;
 
-public class HighScoresWindow extends JDialog {
+public class HighScoresWindow extends JDialog implements HighScoreListener {
     public static final String DEFAULT_RECORD_TEXT = "Unknown - 999";
 
     private final JLabel noviceRecordLabel;
@@ -51,6 +53,15 @@ public class HighScoresWindow extends JDialog {
 
     public String createRecordText(String winnerName, int timeValue) {
         return winnerName + " - " + timeValue;
+    }
+
+    @Override
+    public void setHighScore(String gameType, String name, int time) {
+        switch (gameType) {
+            case "Novice" -> setNoviceRecord(name, time);
+            case "Medium" -> setMediumRecord(name, time);
+            case "Expert" -> setExpertRecord(name, time);
+        }
     }
 
     private JLabel createLabel(String labelText, GridBagLayout layout, int gridY, int margin) {

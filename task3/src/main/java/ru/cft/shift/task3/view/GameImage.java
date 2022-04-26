@@ -34,5 +34,5 @@ public enum GameImage {
         return imageIcon;
     }
 
-    public static GameImage[] IMAGE_INDEXES = {EMPTY, NUM_1, NUM_2, NUM_3, NUM_4, NUM_5, NUM_6, NUM_7, NUM_8, BOMB};
+    public static final GameImage[] IMAGE_INDEXES = {EMPTY, NUM_1, NUM_2, NUM_3, NUM_4, NUM_5, NUM_6, NUM_7, NUM_8, BOMB};
 }

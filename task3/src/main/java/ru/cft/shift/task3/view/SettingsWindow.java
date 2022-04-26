@@ -1,5 +1,7 @@
 package ru.cft.shift.task3.view;
 
+import ru.cft.shift.task3.app.GameType;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;

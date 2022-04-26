@@ -24,7 +24,7 @@ public class RecordsWindow extends JDialog {
         setResizable(false);
         pack();
         setLocationRelativeTo(null);
-        setVisible(true);
+        // setVisible(true);
     }
 
     public void setNameListener(RecordNameListener nameListener) {

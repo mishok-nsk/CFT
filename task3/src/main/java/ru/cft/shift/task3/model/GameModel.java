@@ -6,35 +6,43 @@ import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.cft.shift.task3.view.GameType;
+import ru.cft.shift.task3.app.GameType;
 
 public class GameModel {
     private static final Logger logger = LoggerFactory.getLogger(GameModel.class);
     public static final int BOMB = 9;
     public static final int EMPTY = 0;
-    private final int row;
-    private final int col;
-    private final int bombCount;
-    private final GameType gameType;
+    private int row;
+    private int col;
+    private int bombCount;
+    private GameType gameType;
     private int mineLeft;
     private int cellsClosed;
     private boolean isFieldFilled;
-    private final CellContext[][] cells;
+    private CellContext[][] cells;
     private GameListener listener;
 
     public GameModel(GameType gameType) {
         this.gameType = gameType;
         row = gameType.getRow();
         col = gameType.getCol();
-        logger.info("инициализируем игровую модель размером {} на {} .", row, col);
         bombCount = gameType.getBombCount();
         cells = new CellContext[row][col];
+        logger.info("инициализируем игровую модель размером {} на {} .", row, col);
         initCells();
-        // newGame();
     }
 
     public void setGameListener(GameListener listener) {
         this.listener = listener;
+    }
+
+    public void setGameType(GameType gameType) {
+        this.gameType = gameType;
+        row = gameType.getRow();
+        col = gameType.getCol();
+        bombCount = gameType.getBombCount();
+        cells = new CellContext[row][col];
+        newGame();
     }
 
     public void newGame() {
@@ -66,15 +74,20 @@ public class GameModel {
         }
     }
 
-    public void flaggingCell(int x, int y) {
+    public void markedCell(int x, int y) {
         if (cells[y][x].markedCell()) {
             boolean isMarked = cells[y][x].cellState.getClass().equals(MarkedCell.class);
             if (isMarked) {
+                if (mineLeft == 0) {
+                    cells[y][x].markedCell();
+                    return;
+                }
                 listener.fireEvent(new MarkedCellEvent(GameEvent.MARKED_CELL, x, y, --mineLeft));
+                logger.info("Ячейка [{}] [{}] помечена флагом", x, y);
             } else {
                 listener.fireEvent(new MarkedCellEvent(GameEvent.UNMARKED_CELL, x, y, ++mineLeft));
+                logger.info("Флаг с ячейки [{}] [{}] снят", x, y);
             }
-            logger.info("Ячейка [{}] [{}] помечена флагом: {}", x, y, isMarked);
         }
     }
 
@@ -98,6 +111,17 @@ public class GameModel {
         return value;
     }
 
+    private void initCells() {
+        isFieldFilled = false;
+        mineLeft = bombCount;
+        cellsClosed = row * col;
+        for (int x = 0; x < col; x++) {
+            for (int y = 0; y < row; y++) {
+                cells[y][x] = new CellContext();
+            }
+        }
+    }
+
     private void fillField(int xInit, int yInit) {
         logger.info("Заполняем игровое поле.");
         isFieldFilled = true;
@@ -117,22 +141,12 @@ public class GameModel {
         listener.fireEvent(new GameEvent(GameEvent.START_GAME));
     }
 
-    private void initCells() {
-        isFieldFilled = false;
-        mineLeft = bombCount;
-        cellsClosed = row * col;
-        for (int x = 0; x < col; x++) {
-            for (int y = 0; y < row; y++) {
-                cells[y][x] = new CellContext();
-            }
-        }
-    }
-
     private void incrementNeighbours(int x, int y) {
         // changeNeighbours(x, y, this::incrementNeighbourValue);
         getNeighbours(x, y).forEach(this::incrementNeighbourValue);
 
     }
+
     private void incrementNeighbourValue(Coordinate coord) {
         if (cells[coord.y][coord.x].getValue() != BOMB) {
             cells[coord.y][coord.x].incrementValue();
@@ -167,127 +181,6 @@ public class GameModel {
         Coordinate(int x, int y) {
             this.x = x;
             this.y = y;
-        }
-    }
-
-    abstract static class Cell {
-        int value;
-        protected Cell(int value) {
-            this.value = value;
-        }
-        abstract boolean isCanOpened();
-        abstract boolean isCanMarked();
-        abstract Cell openCell();
-        abstract Cell markedCell();
-    }
-
-    class CloseCell extends Cell {
-        CloseCell(int value) {
-            super(value);
-        }
-
-        @Override
-        boolean isCanOpened() {
-            return true;
-        }
-
-        @Override
-        boolean isCanMarked() {
-            return true;
-        }
-
-        @Override
-        Cell openCell() {
-            return new OpenCell(value);
-        }
-
-        @Override
-        Cell markedCell() {
-            return new MarkedCell(value);
-        }
-    }
-
-    static class OpenCell extends Cell {
-        OpenCell(int value) {
-            super(value);
-        }
-
-        @Override
-        boolean isCanOpened() {
-            return false;
-        }
-
-        @Override
-        boolean isCanMarked() {
-            return false;
-        }
-
-        Cell openCell() {
-            return this;
-        }
-
-        Cell markedCell() {
-            return this;
-        }
-    }
-
-    class MarkedCell extends Cell {
-        MarkedCell(int value) {
-            super(value);
-        }
-
-        @Override
-        boolean isCanOpened() {
-            return false;
-        }
-
-        @Override
-        boolean isCanMarked() {
-            return true;
-        }
-
-        Cell openCell() {
-            return this;
-        }
-
-        Cell markedCell() {
-            return new CloseCell(value);
-        }
-    }
-
-    class CellContext {
-        Cell cellState;
-
-        public CellContext() {
-            cellState = new CloseCell(0);
-        }
-
-        public boolean openCell() {
-            if (cellState.isCanOpened()) {
-                cellState = cellState.openCell();
-                return true;
-            }
-            return false;
-        }
-
-        public boolean markedCell() {
-            if (cellState.isCanMarked()) {
-                cellState  = cellState.markedCell();
-                return true;
-            }
-            return false;
-        }
-
-        public void setValue(int value) {
-            cellState.value = value;
-        }
-
-        public void incrementValue() {
-            cellState.value++;
-        }
-
-        public int getValue() {
-            return cellState.value;
         }
     }
 

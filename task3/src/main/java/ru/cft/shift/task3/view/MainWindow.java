@@ -1,5 +1,7 @@
 package ru.cft.shift.task3.view;
 
+import ru.cft.shift.task3.app.GameType;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -16,16 +18,19 @@ public class MainWindow extends JFrame {
     private JMenuItem exitMenu;
 
     private CellEventListener listener;
+    private TimerEventListener timerListener;
+    private GameExitListener gameExitListener;
 
     private JButton[][] cellButtons;
     private JLabel timerLabel;
     private JLabel bombsCounterLabel;
     private Timer timer;
     private int gameTime;
+    private GameType gameType;
 
     public MainWindow() {
         super("Miner");
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setResizable(false);
 
         createMenu();
@@ -37,12 +42,6 @@ public class MainWindow extends JFrame {
         contentPane.setBackground(new Color(144, 158, 184));
         timer = new Timer(1000, e -> incrementTimerLabel());
     }
-
-    private void incrementTimerLabel() {
-        gameTime++;
-        setTimerValue(gameTime);
-    }
-
 
     private void createMenu() {
         JMenuBar menuBar = new JMenuBar();
@@ -57,6 +56,12 @@ public class MainWindow extends JFrame {
 
         menuBar.add(gameMenu);
         setJMenuBar(menuBar);
+    }
+
+    @Override
+    public void dispose() {
+        gameExitListener.gameExit();
+        super.dispose();
     }
 
     public void setNewGameMenuAction(ActionListener listener) {
@@ -79,8 +84,27 @@ public class MainWindow extends JFrame {
         this.listener = listener;
     }
 
+    public void setTimerListener(TimerEventListener listener) {
+        timerListener = listener;
+    }
+
+    public void setGameExitListener(GameExitListener listener) {
+        gameExitListener = listener;
+    }
+
     public void setCellImage(int x, int y, GameImage gameImage) {
         cellButtons[y][x].setIcon(gameImage.getImageIcon());
+    }
+
+    public void setGameType(GameType gameType) {
+        this.gameType = gameType;
+        createGameField(gameType.getRow(), gameType.getCol());
+        setBombsCount(gameType.getBombCount());
+    }
+
+    public void newGame(GameType gameType) {
+        timer.stop();
+        setGameType(gameType);
     }
 
     public void setBombsCount(int bombsCount) {
@@ -91,7 +115,7 @@ public class MainWindow extends JFrame {
         timerLabel.setText(String.valueOf(value));
     }
 
-    public void createGameField(int rowsCount, int colsCount) {
+    private void createGameField(int rowsCount, int colsCount) {
         contentPane.removeAll();
         gameTime = 0;
         setPreferredSize(new Dimension(20 * colsCount + 70, 20 * rowsCount + 110));
@@ -109,8 +133,9 @@ public class MainWindow extends JFrame {
         timer.start();
     }
 
-    public void stopTimer() {
+    public void stopTimer(boolean isWin) {
         timer.stop();
+        if (isWin) timerListener.endWinGame(Integer.valueOf(timerLabel.getText()), gameType);
     }
 
     private JPanel createButtonsPanel(int numberOfRows, int numberOfCols) {
@@ -152,6 +177,11 @@ public class MainWindow extends JFrame {
         }
 
         return buttonsPanel;
+    }
+
+    private void incrementTimerLabel() {
+        gameTime++;
+        setTimerValue(gameTime);
     }
 
     private void addButtonsPanel(JPanel buttonsPanel) {
