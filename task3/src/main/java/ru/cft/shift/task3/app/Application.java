@@ -18,11 +18,10 @@ public class Application {
         WinWindow winWindow = new WinWindow(mainWindow);
         LoseWindow loseWindow = new LoseWindow(mainWindow);
 
+        HighScoresHandler highScoresHandler = new HighScoresHandler(properties.getProperty("highScoreFileName"));
         GameModel gameModel = new GameModel(gameType);
         GameController gameController = new GameController(gameModel);
-        HighScoresHandler highScoresHandler = new HighScoresHandler(properties.getProperty("highScoreFileName"));
-        HighScoresController highScoreController = new HighScoresController(highScoresHandler);
-
+        gameModel.setHighScoresHandler(highScoresHandler);
 
         mainWindow.setGameType(gameType);
         mainWindow.setSettingsMenuAction(e -> settingsWindow.setVisible(true));
@@ -30,28 +29,25 @@ public class Application {
         mainWindow.setExitMenuAction(e -> mainWindow.dispose());
         mainWindow.setNewGameMenuAction(gameController);
         mainWindow.setCellListener(gameController::onMouseClick);
-        mainWindow.setGameExitListener(highScoreController::exitGame);
-        mainWindow.setTimerListener(highScoreController::endGame);
+        mainWindow.setGameExitListener(gameController::exitGame);
 
         settingsWindow.setGameTypeListener(gameController::changeGameType);
         loseWindow.setExitListener(e -> mainWindow.dispose());
         loseWindow.setNewGameListener(gameController);
         winWindow.setExitListener(e -> mainWindow.dispose());
         winWindow.setNewGameListener(gameController);
-        recordsWindow.setNameListener(highScoreController::userNameEntered);
+        recordsWindow.setNameListener(gameController::userNameEntered);
 
         highScoresHandler.setHighScoreListener(highScoresWindow);
         highScoresHandler.readHighScoreData();
         highScoresHandler.setUpdateRecordListener(() -> recordsWindow.setVisible(true));
-        recordsWindow.setNameListener(highScoreController::userNameEntered);
 
         gameModel.setGameListener( e -> {
             switch (e.getEvent()) {
                 case GameEvent.NEW_GAME -> {
                     GameType gt = ((NewGameEvent) e).getGameType();
-                    mainWindow.newGame(gt);
+                    mainWindow.setGameType(gt);
                 }
-                case GameEvent.START_GAME -> mainWindow.startTimer();
                 case GameEvent.OPEN_CELL -> {
                     OpenCellEvent oce = (OpenCellEvent) e;
                     mainWindow.setCellImage(oce.getX(), oce.getY(), GameImage.IMAGE_INDEXES[oce.getValue()]);
@@ -66,14 +62,11 @@ public class Application {
                     mainWindow.setCellImage(mce.getX(), mce.getY(), GameImage.CLOSED);
                     mainWindow.setBombsCount(mce.getBombCount());
                 }
-                case GameEvent.YOU_WIN -> {
-                    mainWindow.stopTimer(true);
-                    winWindow.setVisible(true);
-                }
-                case GameEvent.YOU_LOSE -> {
-                    mainWindow.stopTimer(false);
-                    loseWindow.setVisible(true);
-                }
+                case GameEvent.YOU_WIN -> winWindow.setVisible(true);
+
+                case GameEvent.YOU_LOSE -> loseWindow.setVisible(true);
+
+                case GameEvent.SET_TIME -> mainWindow.setTimerValue(((TimerEvent) e).getTime());
             }
         });
         mainWindow.setVisible(true);

@@ -22,18 +22,10 @@ public class HighScoresReaderFromFile implements HighScoresReader {
     public void readHighScores(Map<String, HighScoreData> highScoreDataMap) {
         try {
         File file = new File(fileName);
-        if (!file.exists()) {
-            file.createNewFile();
-        }
         ObjectMapper mapper = new ObjectMapper();
         highScoreDataMap.putAll(mapper.readValue(file, new TypeReference<HashMap<String, HighScoreData>>() {}));
         } catch (IOException e) {
-            logger.error("Не удалось прочитать данные рекордов из файла {}", e);
+            logger.error("Не удалось прочитать данные рекордов из файла.", e);
         }
-    }
-
-    private static void putDataInMap(Map<String, HighScoreData> map, String inputString) throws NumberFormatException {
-        String[] inputData = inputString.split(":");
-        map.put(inputData[0], new HighScoreData(inputData[1], Integer.valueOf(inputData[2])));
     }
 }

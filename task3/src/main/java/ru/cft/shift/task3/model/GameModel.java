@@ -3,6 +3,7 @@ package ru.cft.shift.task3.model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Timer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,9 @@ public class GameModel {
     private boolean isFieldFilled;
     private CellContext[][] cells;
     private GameListener listener;
+    private HighScoresHandler highScoresHandler;
+    private int time;
+    private Timer timer;
 
     public GameModel(GameType gameType) {
         this.gameType = gameType;
@@ -28,6 +32,7 @@ public class GameModel {
         col = gameType.getCol();
         bombCount = gameType.getBombCount();
         cells = new CellContext[row][col];
+        timer = new Timer();
         logger.info("инициализируем игровую модель размером {} на {} .", row, col);
         initCells();
     }
@@ -45,8 +50,16 @@ public class GameModel {
         newGame();
     }
 
+    public void setHighScoresHandler(HighScoresHandler hsh) {
+        highScoresHandler = hsh;
+    }
+
     public void newGame() {
         initCells();
+        time = 0;
+        timer.cancel();
+        timer = new Timer();
+        listener.fireEvent(new TimerEvent(time));
         listener.fireEvent(new NewGameEvent(gameType));
     }
 
@@ -60,6 +73,8 @@ public class GameModel {
             if (value == EMPTY) openNeighbours(x, y);
         }
         if (cellsClosed == bombCount) {
+            timer.cancel();
+            highScoresHandler.checkTimeRecord(time, gameType);
             listener.fireEvent(new GameEvent(GameEvent.YOU_WIN));
         }
     }
@@ -89,6 +104,15 @@ public class GameModel {
                 logger.info("Флаг с ячейки [{}] [{}] снят", x, y);
             }
         }
+    }
+
+    public void updateHighScore(String name) {
+        highScoresHandler.updateHighScore(name);
+    }
+
+    public void exitGame() {
+        timer.cancel();
+        highScoresHandler.writeHighScore();
     }
 
     private boolean isMarked(Coordinate coord) {
@@ -138,7 +162,7 @@ public class GameModel {
                 incrementNeighbours(x, y);
             }
         }
-        listener.fireEvent(new GameEvent(GameEvent.START_GAME));
+        timer.scheduleAtFixedRate(new MyTimerTask(this), 0, 1000);
     }
 
     private void incrementNeighbours(int x, int y) {
@@ -159,6 +183,7 @@ public class GameModel {
                 openCell(x, y);
             }
         }
+        timer.cancel();
         listener.fireEvent(new GameEvent(GameEvent.YOU_LOSE));
     }
 
@@ -172,6 +197,10 @@ public class GameModel {
                 }
             }
         return list;
+    }
+
+    void incrementTime() {
+        listener.fireEvent(new TimerEvent(++time));
     }
 
     static class Coordinate {

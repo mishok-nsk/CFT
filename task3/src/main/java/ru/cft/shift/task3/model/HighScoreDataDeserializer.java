@@ -1,11 +1,9 @@
 package ru.cft.shift.task3.model;
 
-// import com.fasterxml.jackson.databind.deser.Deserializers;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.node.IntNode;
 
 import java.io.IOException;
 
@@ -18,10 +16,10 @@ public class HighScoreDataDeserializer extends StdDeserializer<HighScoreData> {
     }
 
     @Override
-    public HighScoreData deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonParseException {
+    public HighScoreData deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
         JsonNode node = jp.getCodec().readTree(jp);
         String winnerName = node.get("winnerName").asText();
-        int timeValue = (Integer) ((IntNode) node.get("timeValue")).numberValue();
+        int timeValue = (Integer) node.get("timeValue").numberValue();
         return new HighScoreData(winnerName, timeValue);
     }
 }

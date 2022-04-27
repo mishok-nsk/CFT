@@ -2,7 +2,7 @@ package ru.cft.shift.task3.model;
 
 public class GameEvent {
     public static final int NEW_GAME = 0;
-    public static final int START_GAME = 1;
+    public static final int SET_TIME = 1;
     public static final int OPEN_CELL = 2;
     public static final int MARKED_CELL = 3;
     public static final int UNMARKED_CELL = 4;

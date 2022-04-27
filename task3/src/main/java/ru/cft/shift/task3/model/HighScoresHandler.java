@@ -40,6 +40,9 @@ public class HighScoresHandler {
 
     public void updateHighScore(String name) {
         logger.info("Обновляем данные рекордов.");
+        if (name.isBlank()) {
+            name = "Unknown";
+        }
         HighScoreData hsd = new HighScoreData(name, highScoreTime);
         highScoreDataMap.put(gameType, hsd);
         highScorelistener.setHighScore(gameType, name, highScoreTime);

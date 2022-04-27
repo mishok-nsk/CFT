@@ -18,7 +18,7 @@ public class MyProperties {
             logger.info("Читаем .properties.");
             prop.load(stream);
         } catch (IOException e) {
-            logger.error("Не удалось прочитать .properties: ", e);
+            logger.error("Не удалось прочитать файл .properties: ", e);
             prop.put("highScoreFileName", DEFAULT_HIGH_SCORE_FILE_NAME);
         }
         return prop;
