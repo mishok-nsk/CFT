@@ -5,67 +5,38 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
-import java.util.concurrent.*;
-
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 public class ConcurrentCalculate {
+    public static final int THREAD_NUMBER = Runtime.getRuntime().availableProcessors() - 1;
     private static final Logger logger = LoggerFactory.getLogger(ConcurrentCalculate.class);
-    public static final int THREAD_NUMBER = 4;
 
-    static Callable<Double> task(int numberOfThread, int end) {
-        return () -> {
-            double result = 0;
-            for (int i = numberOfThread; i <= end; i += THREAD_NUMBER) {
-                logger.debug("Поток {} просчитал значение для {} элемента", Thread.currentThread().getName(), i);
-                result += 1.0 / i / (i + 1); // функция 1 / n(n+1). Умножение в знаменателе заменено на два деления чтобы не допустить переполнения.
-            }
-            logger.info("Поток {} просчитал значение элементов. Результат {}", Thread.currentThread().getName(), result);
-            return result;
-        };
+    private final int number;
+
+    public ConcurrentCalculate(int number) {
+        this.number = number;
     }
 
-    public static void main(String[] args) {
-        int number;
-        try (Scanner in = new Scanner(System.in)) {
-            System.out.print("Введите количество элементов вычисления:");
-            String input = in.nextLine();
-            number = Integer.parseInt(input);
-            if (number < 1) {
-                logger.info("Введенное некорректное число.");
-                return;
-            }
-        } catch (NoSuchElementException e) {
-            logger.error("Данные не введены.");
-            return;
-        } catch (NumberFormatException e) {
-            logger.error("Введены некорректные данные.");
-            return;
-        }
-
-        ExecutorService executor = Executors.newFixedThreadPool(THREAD_NUMBER);
-        List<Callable<Double>> tasks = new ArrayList<>(THREAD_NUMBER);
+    public void calculate() {
+        List<Future<Double>> tasks = new ArrayList<>(THREAD_NUMBER - 1);
+        int numberPerTask = number / THREAD_NUMBER;
         for (int i = 1; i <= THREAD_NUMBER; i++) {
-            tasks.add(task(i, number));
+            int start = numberPerTask * (i -1) + 1;
+            int end = i == THREAD_NUMBER ? number : numberPerTask * i;
+            tasks.add(CompletableFuture.supplyAsync(new ThreadTask(start, end)::calculate));
         }
 
-        double sum = 0;
-        try {
-            sum = executor.invokeAll(tasks).stream()
-                    .mapToDouble(future -> {
-                        try {
-                            return future.get();
-                        } catch (Exception e) {
-                            logger.error("Exception method get", e);
-                            throw new IllegalStateException();
-                        }
-                    })
-                    .sum();
-        } catch (InterruptedException e) {
-            logger.error("Thread is interrupted. ", e);
-        }
-        executor.shutdown();
+        double sum = tasks.stream()
+                .mapToDouble(future -> {
+                    try {
+                        return future.get();
+                    } catch (Exception e) {
+                        logger.error("Exception method get", e);
+                        throw new IllegalStateException();
+                    }
+                })
+                .sum();
         logger.info("Сумма значений {} элементов равна {} ", number, sum);
-        }
+    }
 }
