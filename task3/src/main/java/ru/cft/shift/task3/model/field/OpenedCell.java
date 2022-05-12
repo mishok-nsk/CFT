@@ -1,17 +1,17 @@
-package ru.cft.shift.task3.model;
+package ru.cft.shift.task3.model.field;
 
-class OpenCell extends Cell {
-    OpenCell(int value) {
+class OpenedCell extends Cell {
+    OpenedCell(int value) {
         super(value);
     }
 
     @Override
-    boolean isCanOpened() {
+    boolean isCanOpen() {
         return false;
     }
 
     @Override
-    boolean isCanMarked() {
+    boolean isCanMark() {
         return false;
     }
 
@@ -19,7 +19,7 @@ class OpenCell extends Cell {
         return this;
     }
 
-    Cell markedCell() {
+    Cell markCell() {
         return this;
     }
 }

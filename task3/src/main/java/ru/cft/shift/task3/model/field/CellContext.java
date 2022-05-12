@@ -1,14 +1,14 @@
-package ru.cft.shift.task3.model;
+package ru.cft.shift.task3.model.field;
 
 class CellContext {
     Cell cellState;
 
     public CellContext() {
-        cellState = new CloseCell(0);
+        cellState = new ClosedCell(0);
     }
 
     public boolean openCell() {
-        if (cellState.isCanOpened()) {
+        if (cellState.isCanOpen()) {
             cellState = cellState.openCell();
             return true;
         }
@@ -16,8 +16,8 @@ class CellContext {
     }
 
     public boolean markedCell() {
-        if (cellState.isCanMarked()) {
-            cellState = cellState.markedCell();
+        if (cellState.isCanMark()) {
+            cellState = cellState.markCell();
             return true;
         }
         return false;

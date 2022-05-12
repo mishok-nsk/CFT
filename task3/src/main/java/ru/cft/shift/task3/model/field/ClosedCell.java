@@ -1,28 +1,28 @@
-package ru.cft.shift.task3.model;
+package ru.cft.shift.task3.model.field;
 
-class CloseCell extends Cell {
+class ClosedCell extends Cell {
 
-    CloseCell(int value) {
+    ClosedCell(int value) {
         super(value);
     }
 
     @Override
-    boolean isCanOpened() {
+    boolean isCanOpen() {
         return true;
     }
 
     @Override
-    boolean isCanMarked() {
+    boolean isCanMark() {
         return true;
     }
 
     @Override
     Cell openCell() {
-        return new OpenCell(value);
+        return new OpenedCell(value);
     }
 
     @Override
-    Cell markedCell() {
+    Cell markCell() {
         return new MarkedCell(value);
     }
 }

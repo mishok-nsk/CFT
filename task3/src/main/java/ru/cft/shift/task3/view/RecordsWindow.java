@@ -23,12 +23,17 @@ public class RecordsWindow extends JDialog {
         setPreferredSize(new Dimension(210, 120));
         setResizable(false);
         pack();
-        setLocationRelativeTo(null);
+        // setLocationRelativeTo(null);
         // setVisible(true);
     }
 
     public void setNameListener(RecordNameListener nameListener) {
         this.nameListener = nameListener;
+    }
+
+    public void showYourself() {
+        setLocationRelativeTo(getOwner());
+        setVisible(true);
     }
 
     private JButton createOkButton(JTextField nameField) {

@@ -4,6 +4,8 @@ import ru.cft.shift.task3.app.GameType;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,7 +13,7 @@ public class SettingsWindow extends JDialog {
     private final Map<GameType, JRadioButton> radioButtonsMap = new HashMap<>(3);
     private final ButtonGroup radioGroup = new ButtonGroup();
 
-    private GameTypeListener gameTypeListener;
+    private final List<GameTypeListener> gameTypeListener;
     private GameType gameType;
 
     public SettingsWindow(JFrame owner) {
@@ -24,7 +26,7 @@ public class SettingsWindow extends JDialog {
         int gridY = 0;
         contentPane.add(createRadioButton("Novice (10 mines, 9х9)", GameType.NOVICE, layout, gridY++));
         contentPane.add(createRadioButton("Medium (40 mines, 16х16)", GameType.MEDIUM, layout, gridY++));
-        contentPane.add(createRadioButton("Expert (99 mines, 16х30)", GameType.EXPERT, layout, gridY++));
+        contentPane.add(createRadioButton("Expert (99 mines, 16х30)", GameType.EXPERT, layout, gridY));
 
         contentPane.add(createOkButton(layout));
         contentPane.add(createCloseButton(layout));
@@ -33,8 +35,9 @@ public class SettingsWindow extends JDialog {
         setPreferredSize(new Dimension(300, 180));
         setResizable(false);
         pack();
-        setLocationRelativeTo(null);
+        // setLocationRelativeTo(null);
 
+        gameTypeListener = new ArrayList<>(2);
         setGameType(GameType.NOVICE);
     }
 
@@ -50,7 +53,12 @@ public class SettingsWindow extends JDialog {
     }
 
     public void setGameTypeListener(GameTypeListener gameTypeListener) {
-        this.gameTypeListener = gameTypeListener;
+        this.gameTypeListener.add(gameTypeListener);
+    }
+
+    public void showYourself() {
+        setLocationRelativeTo(getOwner());
+        setVisible(true);
     }
 
     private JRadioButton createRadioButton(String radioButtonText, GameType gameType, GridBagLayout layout, int gridY) {
@@ -78,9 +86,8 @@ public class SettingsWindow extends JDialog {
         okButton.setPreferredSize(new Dimension(80, 25));
         okButton.addActionListener(e -> {
             dispose();
-
-            if (gameTypeListener != null) {
-                gameTypeListener.onGameTypeChanged(gameType);
+            for (GameTypeListener l : gameTypeListener) {
+                l.onGameTypeChanged(gameType);
             }
         });
 

@@ -39,21 +39,16 @@ public class GameController implements ActionListener {
         gameModel.setGameType(gameType);
     }
 
-    public void exitGame() {
-        logger.info("Приложение заканчиваетработу.");
-        gameModel.exitGame();
-    }
-
-    public void userNameEntered(String name) {
-        logger.info("Введено имя пользователя.");
-        gameModel.updateHighScore(name);
-    }
-
     @Override
     public void actionPerformed(ActionEvent e) {
         logger.info("Контроллер игровой модели получил команду {} .", e.getActionCommand());
         if (e.getActionCommand().equals("New Game")) {
             gameModel.newGame();
         }
+    }
+
+    public void exitGame() {
+        logger.info("Приложение заканчиваетработу.");
+        gameModel.exitGame();
     }
 }

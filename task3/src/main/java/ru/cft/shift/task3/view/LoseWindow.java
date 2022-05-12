@@ -3,9 +3,11 @@ package ru.cft.shift.task3.view;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LoseWindow extends JDialog {
-    private ActionListener newGameListener;
+    private final List<ActionListener> newGameListener;
     private ActionListener exitListener;
 
     public LoseWindow(JFrame owner) {
@@ -23,16 +25,23 @@ public class LoseWindow extends JDialog {
         setPreferredSize(new Dimension(300, 130));
         setResizable(false);
         pack();
-        setLocationRelativeTo(null);
-        setVisible(false);
+        // setLocationRelativeTo(null);
+        // setVisible(false);
+
+        newGameListener = new ArrayList<>();
     }
 
-    public void setNewGameListener(ActionListener newGameListener) {
-        this.newGameListener = newGameListener;
+    public void addNewGameListener(ActionListener newGameListener) {
+        this.newGameListener.add(newGameListener);
     }
 
     public void setExitListener(ActionListener exitListener) {
         this.exitListener = exitListener;
+    }
+
+    public void showYourself() {
+        setLocationRelativeTo(getOwner());
+        setVisible(true);
     }
 
     private JLabel createLoseLabel(GridBagLayout layout) {
@@ -55,9 +64,12 @@ public class LoseWindow extends JDialog {
         newGameButton.addActionListener(e -> {
             dispose();
 
-            if (newGameListener != null) {
-                newGameListener.actionPerformed(e);
+            for (ActionListener l : newGameListener) {
+                l.actionPerformed(e);
             }
+//            if (newGameListener != null) {
+//                newGameListener.actionPerformed(e);
+//            }
         });
 
         GridBagConstraints gbc = new GridBagConstraints();

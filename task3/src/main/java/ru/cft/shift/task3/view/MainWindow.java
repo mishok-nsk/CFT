@@ -7,6 +7,8 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainWindow extends JFrame {
     private final Container contentPane;
@@ -18,7 +20,8 @@ public class MainWindow extends JFrame {
     private JMenuItem exitMenu;
 
     private CellEventListener listener;
-    private GameExitListener gameExitListener;
+    private final List<GameExitListener> gameExitListener;
+    private GameType gameType;
 
     private JButton[][] cellButtons;
     private JLabel timerLabel;
@@ -31,11 +34,14 @@ public class MainWindow extends JFrame {
 
         createMenu();
 
+        newGameMenu.addActionListener(e -> this.clearGameField());
         contentPane = getContentPane();
         mainLayout = new GridBagLayout();
         contentPane.setLayout(mainLayout);
 
         contentPane.setBackground(new Color(144, 158, 184));
+
+        gameExitListener = new ArrayList<>(2);
     }
 
     private void createMenu() {
@@ -55,7 +61,7 @@ public class MainWindow extends JFrame {
 
     @Override
     public void dispose() {
-        gameExitListener.gameExit();
+        gameExitListener.forEach(GameExitListener::gameExit);
         super.dispose();
     }
 
@@ -79,16 +85,26 @@ public class MainWindow extends JFrame {
         this.listener = listener;
     }
 
-    public void setGameExitListener(GameExitListener listener) {
-        gameExitListener = listener;
+    public void addGameExitListener(GameExitListener listener) {
+        gameExitListener.add(listener);
     }
 
     public void setCellImage(int x, int y, GameImage gameImage) {
         cellButtons[y][x].setIcon(gameImage.getImageIcon());
     }
 
+    public void createGameField(GameType gameType) {
+        setGameType(gameType);
+        setLocationRelativeTo(null);
+    }
+
     public void setGameType(GameType gameType) {
-        createGameField(gameType.getRow(), gameType.getCol());
+        this.gameType = gameType;
+        clearGameField();
+    }
+
+    public void clearGameField() {
+        drawGameField(gameType.getRow(), gameType.getCol());
         setBombsCount(gameType.getBombCount());
     }
 
@@ -100,7 +116,7 @@ public class MainWindow extends JFrame {
         timerLabel.setText(String.valueOf(value));
     }
 
-    private void createGameField(int rowsCount, int colsCount) {
+    private void drawGameField(int rowsCount, int colsCount) {
         contentPane.removeAll();
         setPreferredSize(new Dimension(20 * colsCount + 70, 20 * rowsCount + 110));
 
@@ -110,7 +126,6 @@ public class MainWindow extends JFrame {
         addBombCounter(bombsCounterLabel = new JLabel("0"));
         addBombCounterImage();
         pack();
-        setLocationRelativeTo(null);
     }
 
     private JPanel createButtonsPanel(int numberOfRows, int numberOfCols) {
@@ -133,17 +148,11 @@ public class MainWindow extends JFrame {
                         }
 
                         switch (e.getButton()) {
-                            case MouseEvent.BUTTON1:
-                                listener.onMouseClick(x, y, ButtonType.LEFT_BUTTON);
-                                break;
-                            case MouseEvent.BUTTON2:
-                                listener.onMouseClick(x, y, ButtonType.MIDDLE_BUTTON);
-                                break;
-                            case MouseEvent.BUTTON3:
-                                listener.onMouseClick(x, y, ButtonType.RIGHT_BUTTON);
-                                break;
-                            default:
-                                // Other mouse buttons are ignored
+                            case MouseEvent.BUTTON1 -> listener.onMouseClick(x, y, ButtonType.LEFT_BUTTON);
+                            case MouseEvent.BUTTON2 -> listener.onMouseClick(x, y, ButtonType.MIDDLE_BUTTON);
+                            case MouseEvent.BUTTON3 -> listener.onMouseClick(x, y, ButtonType.RIGHT_BUTTON);
+                            default -> {
+                            } // Other mouse buttons are ignored
                         }
                     }
                 });

@@ -1,4 +1,4 @@
-package ru.cft.shift.task3.model;
+package ru.cft.shift.task3.model.field;
 
 abstract class Cell {
     int value;
@@ -7,11 +7,11 @@ abstract class Cell {
         this.value = value;
     }
 
-    abstract boolean isCanOpened();
+    abstract boolean isCanOpen();
 
-    abstract boolean isCanMarked();
+    abstract boolean isCanMark();
 
     abstract Cell openCell();
 
-    abstract Cell markedCell();
+    abstract Cell markCell();
 }

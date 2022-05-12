@@ -1,4 +1,4 @@
-package ru.cft.shift.task3.model;
+package ru.cft.shift.task3.model.highscores;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.DeserializationContext;

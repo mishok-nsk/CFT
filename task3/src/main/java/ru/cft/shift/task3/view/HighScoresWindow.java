@@ -1,6 +1,6 @@
 package ru.cft.shift.task3.view;
 
-import ru.cft.shift.task3.model.HighScoreListener;
+import ru.cft.shift.task3.model.highscores.HighScoreListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,7 +28,7 @@ public class HighScoresWindow extends JDialog implements HighScoreListener {
         contentPane.add(mediumRecordLabel = createLabel(DEFAULT_RECORD_TEXT, layout, gridY++, 0));
 
         contentPane.add(createLabel("Expert:", layout, gridY++, 10));
-        contentPane.add(expertRecordLabel = createLabel(DEFAULT_RECORD_TEXT, layout, gridY++, 0));
+        contentPane.add(expertRecordLabel = createLabel(DEFAULT_RECORD_TEXT, layout, gridY, 0));
 
         contentPane.add(createCloseButton(layout));
 
@@ -36,7 +36,7 @@ public class HighScoresWindow extends JDialog implements HighScoreListener {
         setPreferredSize(new Dimension(200, 200));
         setResizable(false);
         pack();
-        setLocationRelativeTo(null);
+        // setLocationRelativeTo(null);
     }
 
     public void setNoviceRecord(String winnerName, int timeValue) {
@@ -62,6 +62,11 @@ public class HighScoresWindow extends JDialog implements HighScoreListener {
             case "Medium" -> setMediumRecord(name, time);
             case "Expert" -> setExpertRecord(name, time);
         }
+    }
+
+    public void showYourself() {
+        setLocationRelativeTo(getOwner());
+        setVisible(true);
     }
 
     private JLabel createLabel(String labelText, GridBagLayout layout, int gridY, int margin) {
