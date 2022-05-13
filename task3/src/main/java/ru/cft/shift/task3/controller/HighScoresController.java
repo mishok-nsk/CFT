@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import ru.cft.shift.task3.model.highscores.HighScoresHandler;
 
 public class HighScoresController {
-    public static final Logger logger = LoggerFactory.getLogger(HighScoresController.class);
+    private static final Logger logger = LoggerFactory.getLogger(HighScoresController.class);
     private final HighScoresHandler highScoresHandler;
 
     public HighScoresController(HighScoresHandler highScoresHandler) {

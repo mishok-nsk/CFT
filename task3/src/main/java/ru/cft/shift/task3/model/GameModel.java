@@ -10,7 +10,7 @@ import ru.cft.shift.task3.timer.MyTimer;
 
 
 public class GameModel {
-    public static final Logger logger = LoggerFactory.getLogger(GameModel.class);
+    private static final Logger logger = LoggerFactory.getLogger(GameModel.class);
     private Field field;
     private GameType gameType;
     private boolean isFieldFilled;

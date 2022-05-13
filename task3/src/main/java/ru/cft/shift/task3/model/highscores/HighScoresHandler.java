@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HighScoresHandler implements HighScoreChecker {
-    public static final Logger logger = LoggerFactory.getLogger(HighScoresHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(HighScoresHandler.class);
     public final String fileName;
     private static final Map<String, HighScoreData> highScoreDataMap = new HashMap<>(3);
     private int highScoreTime;
