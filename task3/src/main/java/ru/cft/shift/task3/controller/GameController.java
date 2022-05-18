@@ -20,15 +20,15 @@ public class GameController implements ActionListener {
     public void onMouseClick(int x, int y, ButtonType buttonType) {
         switch (buttonType) {
             case LEFT_BUTTON -> {
-                logger.info("Нажата кнопка [{}] [{}] {} кнопкой мыши.", x, y, ButtonType.LEFT_BUTTON);
+                logger.debug("Нажата кнопка [{}] [{}] {} кнопкой мыши.", x, y, ButtonType.LEFT_BUTTON);
                 gameModel.openCells(x, y);
             }
             case RIGHT_BUTTON -> {
-                logger.info("Нажата кнопка [{}] [{}] {} кнопкой мыши.", x, y, ButtonType.RIGHT_BUTTON);
+                logger.debug("Нажата кнопка [{}] [{}] {} кнопкой мыши.", x, y, ButtonType.RIGHT_BUTTON);
                 gameModel.markedCell(x, y);
             }
             case MIDDLE_BUTTON -> {
-                logger.info("Нажата кнопка [{}] [{}] {} кнопкой мыши.", x, y, ButtonType.MIDDLE_BUTTON);
+                logger.debug("Нажата кнопка [{}] [{}] {} кнопкой мыши.", x, y, ButtonType.MIDDLE_BUTTON);
                 gameModel.openNeighboursWithCheck(x, y);
             }
         }

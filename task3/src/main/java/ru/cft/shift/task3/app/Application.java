@@ -1,14 +1,19 @@
 package ru.cft.shift.task3.app;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.cft.shift.task3.controller.*;
 import ru.cft.shift.task3.model.*;
 import ru.cft.shift.task3.model.highscores.HighScoresHandler;
-import ru.cft.shift.task3.timer.MyTimer;
+import ru.cft.shift.task3.timer.GameTimer;
 
 import java.util.Properties;
 
 public class Application {
+    private static final Logger logger = LoggerFactory.getLogger(Application.class);
+
     public static void main(String[] args) {
+        logger.info("Приложение запущено.");
         Properties properties = MyProperties.get();
         GameType gameType = GameType.NOVICE;
 
@@ -20,7 +25,7 @@ public class Application {
         HighScoresController highScoresController = new HighScoresController(highScoresHandler);
         gameModel.setHighScoreChecker(highScoresHandler);
 
-        MyTimer timer = new MyTimer();
+        GameTimer timer = new GameTimer();
         windowsManager.attachTimer(timer);
         gameModel.setTimer(timer);
 

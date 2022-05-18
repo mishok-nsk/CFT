@@ -78,10 +78,10 @@ public class Field {
                     return;
                 }
                 markCellListener.markCell(x, y, --mineLeft, true);
-                logger.info("Ячейка [{}] [{}] помечена флагом", x, y);
+                logger.debug("Ячейка [{}] [{}] помечена флагом", x, y);
             } else {
                 markCellListener.markCell(x, y, ++mineLeft, false);
-                logger.info("Флаг с ячейки [{}] [{}] снят", x, y);
+                logger.debug("Флаг с ячейки [{}] [{}] снят", x, y);
             }
         }
     }
@@ -114,7 +114,7 @@ public class Field {
     private int getCellValue(int x, int y) {
         cellsClosed--;
         int value = cells[y][x].getValue();
-        logger.info("Открываем ячейку [{}] [{}] значение {}.", x, y, value);
+        logger.debug("Открываем ячейку [{}] [{}] значение {}.", x, y, value);
         openCellListener.openCell(x, y, value);
         return value;
     }
@@ -130,7 +130,7 @@ public class Field {
             if (!(x == xInit && y == yInit) && !(cells[y][x].getValue() == BOMB)) {
                 mineCounter++;
                 cells[y][x].setValue(BOMB);
-                logger.info("Ставим мину {} на ячейку [{}] [{}].", mineCounter, x, y);
+                logger.debug("Ставим мину {} на ячейку [{}] [{}].", mineCounter, x, y);
                 incrementNeighbours(x, y);
             }
         }

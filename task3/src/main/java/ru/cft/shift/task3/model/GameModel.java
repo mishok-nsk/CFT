@@ -6,7 +6,7 @@ import ru.cft.shift.task3.app.GameType;
 import ru.cft.shift.task3.model.field.Field;
 import ru.cft.shift.task3.model.gamelistener.*;
 import ru.cft.shift.task3.model.highscores.HighScoreChecker;
-import ru.cft.shift.task3.timer.MyTimer;
+import ru.cft.shift.task3.timer.GameTimer;
 
 
 public class GameModel {
@@ -18,7 +18,7 @@ public class GameModel {
     private MarkCellListener markCellListener;
     private EndGameListener endGameListener;
     private HighScoreChecker highScoreChecker;
-    private MyTimer timer;
+    private GameTimer timer;
 
     public GameModel(GameType gameType) {
         this.gameType = gameType;
@@ -39,7 +39,7 @@ public class GameModel {
         this.endGameListener = endGameListener;
     }
 
-    public void setTimer(MyTimer timer) {
+    public void setTimer(GameTimer timer) {
         this.timer = timer;
     }
 

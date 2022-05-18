@@ -2,7 +2,7 @@ package ru.cft.shift.task3.app;
 
 import ru.cft.shift.task3.model.GameModel;
 import ru.cft.shift.task3.model.highscores.HighScoresHandler;
-import ru.cft.shift.task3.timer.MyTimer;
+import ru.cft.shift.task3.timer.GameTimer;
 import ru.cft.shift.task3.view.*;
 
 import java.awt.event.ActionListener;
@@ -58,7 +58,7 @@ public class WindowsManager {
         recordsWindow.setNameListener(listener);
     }
 
-    public void attachTimer(MyTimer timer) {
+    public void attachTimer(GameTimer timer) {
         timer.setTimerListener(mainWindow::setTimerValue);
     }
 

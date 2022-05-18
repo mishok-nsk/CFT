@@ -2,10 +2,10 @@ package ru.cft.shift.task3.timer;
 
 import java.util.TimerTask;
 
-public class MyTimerTask extends TimerTask {
-    MyTimer timer;
+public class GameTimerTask extends TimerTask {
+    GameTimer timer;
 
-    public MyTimerTask(MyTimer timer) {
+    public GameTimerTask(GameTimer timer) {
         this.timer = timer;
     }
 

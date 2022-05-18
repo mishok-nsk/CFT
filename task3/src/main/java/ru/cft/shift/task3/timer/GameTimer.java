@@ -2,7 +2,7 @@ package ru.cft.shift.task3.timer;
 
 import java.util.Timer;
 
-public class MyTimer {
+public class GameTimer {
     private Timer timer;
     private int time;
     private TimerListener timerListener;
@@ -12,7 +12,7 @@ public class MyTimer {
     }
     public void start() {
         timer = new Timer();
-        timer.scheduleAtFixedRate(new MyTimerTask(this), 0, 1000);
+        timer.scheduleAtFixedRate(new GameTimerTask(this), 0, 1000);
     }
 
     public void stop() {
