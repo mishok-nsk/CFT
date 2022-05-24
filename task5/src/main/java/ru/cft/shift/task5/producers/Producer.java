@@ -8,7 +8,6 @@ import java.util.concurrent.TimeUnit;
 
 public class Producer implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(Producer.class);
-    private static final Resource resource = new Resource();
     private static Warehouse warehouse;
 
     private final int time;
@@ -25,10 +24,9 @@ public class Producer implements Runnable {
         while (!Thread.interrupted()) {
             try {
                 TimeUnit.SECONDS.sleep(time);
-                synchronized (resource) {
-                    logger.info("Поток {} произвел ресурс {}.", Thread.currentThread().getName(), resource.getId());
-                    warehouse.putInStock(resource.getAndIncrement());
-                }
+                Resource product = Resource.produce();
+                logger.info("Поток {} произвел ресурс {}.", Thread.currentThread().getName(), product);
+                warehouse.putInStock(product);
             } catch (InterruptedException e) {
                 return;
             }

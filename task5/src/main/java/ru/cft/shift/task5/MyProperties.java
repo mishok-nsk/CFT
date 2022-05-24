@@ -11,7 +11,7 @@ public class MyProperties {
     private static final String FILE_PROPERTIES = "config.properties";
     private static final String DEFAULT_TIME = "1";
     private static final String DEFAULT_COUNT = "1";
-    private static final String DEFAULT_SIZE = "10";
+    private static final String DEFAULT_SIZE = "20";
 
     private int producerCount;
     private int consumerCount;
@@ -27,11 +27,22 @@ public class MyProperties {
             logger.error("Не удалось прочитать файл .properties", e);
             logger.info("Приложение будет запущено со значениями по умолчанию.");
         } finally {
-            producerCount = Integer.parseInt(prop.getProperty("producerCount", DEFAULT_COUNT));
-            producerTime = Integer.parseInt(prop.getProperty("producerTime", DEFAULT_TIME));
-            consumerCount = Integer.parseInt(prop.getProperty("consumerCount", DEFAULT_COUNT));
-            consumerTime = Integer.parseInt(prop.getProperty("consumerTime", DEFAULT_TIME));
-            storageSize = Integer.parseInt(prop.getProperty("storageSize", DEFAULT_SIZE));
+            try {
+                producerCount = Integer.parseInt(prop.getProperty("producerCount", DEFAULT_COUNT));
+                producerTime = Integer.parseInt(prop.getProperty("producerTime", DEFAULT_TIME));
+                consumerCount = Integer.parseInt(prop.getProperty("consumerCount", DEFAULT_COUNT));
+                consumerTime = Integer.parseInt(prop.getProperty("consumerTime", DEFAULT_TIME));
+                storageSize = Integer.parseInt(prop.getProperty("storageSize", DEFAULT_SIZE));
+            } catch (NumberFormatException e) {
+                logger.error("Некорректный формат данных .properties", e);
+                logger.info("Приложение будет запущено со значениями по умолчанию.");
+                producerCount = Integer.parseInt(DEFAULT_COUNT);
+                producerTime = Integer.parseInt(DEFAULT_TIME);
+                consumerCount = Integer.parseInt(DEFAULT_COUNT);
+                consumerTime = Integer.parseInt(DEFAULT_TIME);
+                storageSize = Integer.parseInt(DEFAULT_SIZE);
+            }
+
         }
     }
 
