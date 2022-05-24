@@ -25,10 +25,7 @@ public class Producer implements Runnable {
         while (!Thread.interrupted()) {
             try {
                 TimeUnit.SECONDS.sleep(time);
-                synchronized (resource) {
-                    logger.info("Поток {} произвел ресурс {}.", Thread.currentThread().getName(), resource.getId());
-                    warehouse.putInStock(resource.getAndIncrement());
-                }
+                warehouse.putInStock(resource.produce());
             } catch (InterruptedException e) {
                 return;
             }
