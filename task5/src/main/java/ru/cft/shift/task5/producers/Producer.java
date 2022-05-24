@@ -4,11 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.cft.shift.task5.warehouse.Warehouse;
 
-public class Producer extends Thread {
+import java.util.concurrent.TimeUnit;
+
+public class Producer implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(Producer.class);
-    private static final Object SYNC_PROD = new Object();
+    private static final Resource resource = new Resource();
     private static Warehouse warehouse;
-    private static int idProduct;
+
     private final int time;
 
     public static void setWarehouse(Warehouse inWarehouse) {
@@ -22,10 +24,10 @@ public class Producer extends Thread {
         logger.info("Поток {} запущен.", Thread.currentThread().getName());
         while (!Thread.interrupted()) {
             try {
-                sleep(time * 1000L);
-                logger.info("Поток {} произвел ресурс {}.", Thread.currentThread().getName(), idProduct);
-                synchronized (SYNC_PROD) {
-                    warehouse.putInStock(idProduct++);
+                TimeUnit.SECONDS.sleep(time);
+                synchronized (resource) {
+                    logger.info("Поток {} произвел ресурс {}.", Thread.currentThread().getName(), resource.getId());
+                    warehouse.putInStock(resource.getAndIncrement());
                 }
             } catch (InterruptedException e) {
                 return;

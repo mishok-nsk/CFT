@@ -4,7 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.cft.shift.task5.warehouse.Warehouse;
 
-public class Consumer extends Thread {
+import java.util.concurrent.TimeUnit;
+
+public class Consumer implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(Consumer.class);
     private static Warehouse warehouse;
     private final int time;
@@ -22,7 +24,7 @@ public class Consumer extends Thread {
         while (!Thread.interrupted()) {
             try {
                 int product = warehouse.getFromStock();
-                sleep(time * 1000L);
+                TimeUnit.SECONDS.sleep(time);
                 logger.info("Поток {} потребил ресурс {}.", Thread.currentThread().getName(), product);
             } catch (InterruptedException e) {
                 return;

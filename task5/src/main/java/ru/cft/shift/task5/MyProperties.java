@@ -1,10 +1,14 @@
 package ru.cft.shift.task5;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.FileInputStream;
 import java.util.Properties;
 
 public class MyProperties {
-    private static final String PATH_TO_PROPERTIES = "task5/src/main/resources/config.properties";
+    private static final Logger logger = LoggerFactory.getLogger(MyProperties.class);
+    private static final String FILE_PROPERTIES = "config.properties";
     private static final String DEFAULT_TIME = "1";
     private static final String DEFAULT_COUNT = "1";
     private static final String DEFAULT_SIZE = "10";
@@ -15,10 +19,14 @@ public class MyProperties {
     private int consumerTime;
     private int storageSize;
 
-    public void readProperties() throws Exception {
+    public void readProperties() {
         Properties prop = new Properties();
-        try (FileInputStream stream = new FileInputStream(PATH_TO_PROPERTIES)) {
+        try (FileInputStream stream = new FileInputStream(ClassLoader.getSystemResource(FILE_PROPERTIES).getFile())) {
             prop.load(stream);
+        } catch (Exception e) {
+            logger.error("Не удалось прочитать файл .properties", e);
+            logger.info("Приложение будет запущено со значениями по умолчанию.");
+        } finally {
             producerCount = Integer.parseInt(prop.getProperty("producerCount", DEFAULT_COUNT));
             producerTime = Integer.parseInt(prop.getProperty("producerTime", DEFAULT_TIME));
             consumerCount = Integer.parseInt(prop.getProperty("consumerCount", DEFAULT_COUNT));

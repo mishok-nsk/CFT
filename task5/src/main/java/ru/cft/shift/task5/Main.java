@@ -14,14 +14,9 @@ public class Main {
     public static void main(String[] args) {
         logger.info("Приложение запущено.");
         MyProperties properties = new MyProperties();
-        try {
-            logger.info("Читаем .properties.");
-            properties.readProperties();
-        } catch (Exception e) {
-            logger.error("Ошибка при чтении .properties", e);
-            logger.info("Приложение завершает работу");
-            return;
-        }
+        logger.info("Читаем .properties.");
+        properties.readProperties();
+
         logger.info("Создаем склад.");
         Warehouse warehouse = new Warehouse(properties.getStorageSize());
         logger.info("Создаем производителей и потребителей.");

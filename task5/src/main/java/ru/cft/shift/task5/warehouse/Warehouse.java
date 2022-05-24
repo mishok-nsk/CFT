@@ -31,7 +31,7 @@ public class Warehouse {
         products.add(idProduct);
         logger.info("Поток {} поставил ресурс {} на сток.", Thread.currentThread().getName(), idProduct);
         logger.info("Остаток ресурсов на складе {} единиц.", products.size());
-        notify();
+        notifyAll();
     }
 
     public boolean isEmpty() {
@@ -47,7 +47,7 @@ public class Warehouse {
         int idProduct = products.remove();
         logger.info("Поток {} взял ресурс {} со стока.", Thread.currentThread().getName(), idProduct);
         logger.info("Остаток ресурсов на складе {} единиц.", products.size());
-        notify();
+        notifyAll();
         return idProduct;
     }
 }
