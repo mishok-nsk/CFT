@@ -19,6 +19,10 @@ public class Response {
         this.data = data;
     }
 
+    public void setTimeInMillis(long millis) {
+        time.setTimeInMillis(millis);
+    }
+
     public String getUserName() {
         return userName;
     }

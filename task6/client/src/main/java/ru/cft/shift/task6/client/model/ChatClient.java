@@ -12,14 +12,24 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.Set;
+
+import ru.cft.shift.task6.client.view.ClientListener;
 import ru.cft.shift.task6.common.*;
 
 public class ChatClient {
     private static final Logger logger = LoggerFactory.getLogger(ChatClient.class);
     public static final String CHARSET_NAME = "UTF-8";
+    public static final String SYSTEM_CHARSET = "windows-1251";
+    public static final String YOU = "Вы";
+    public static final String USER_OUT_MESSAGE = "Пользователь покинул чат!";
+    public static final String USER_IN_MESSAGE = "Пользователь присоединился к чату";
     private final int port;
     private String host = "127.0.0.1";
     private String userName = "anonymous";
+    private Set<String> clientList = new HashSet<>();
     private Socket socket;
     private InputStream inputStream;
     private OutputStream outputStream;
@@ -29,6 +39,7 @@ public class ChatClient {
     private MessageListener messageListener;
     private ConnectListener connectListener;
     private AuthorizationListener authorizationListener;
+    private ClientListener clientListener;
 
     public ChatClient(int port) {
         this.port = port;
@@ -59,34 +70,38 @@ public class ChatClient {
         this.authorizationListener = authorizationListener;
     }
 
+    public void setClientListener(ClientListener listener) {
+        clientListener = listener;
+    }
+
     private void authorization() {
         try {
             Request authRequest = new Request(RequestType.AUTHORIZATION, userName);
             // PrintWriter writer= new PrintWriter(outputStream);
             mapper.writeValue(outputStream, authRequest);
-            String request = mapper.writeValueAsString(authRequest);
-            logger.info("запрос: {}", request);
-            // outputStream.write(userName.getBytes(CHARSET_NAME));
-            // outputStream.flush();
-            Thread.currentThread().sleep(1000);
-            int available = inputStream.available();
-            if (available > 0) {
-                Response response = mapper.readValue(inputStream, Response.class);
-                if (response.getType() == ResponseType.AUTHORIZATION_OK) {
-                    logger.info("Авторизация прошла успешно.");
-                    serverListenerThread.start();
-                } else {
-                    logger.info("Авторизация не удалась: {}", response.getData());
-                }
-                authorizationListener.getResponse(response.getData());
-            } else {
-                authorizationListener.getResponse("Server not response!");
-            }
+            // String request = mapper.writeValueAsString(authRequest);
+            // logger.info("запрос: {}", request);
+            // Thread.currentThread().sleep(500);
+//            int available = inputStream.available();
+//            if (available > 0) {
+//                Response response = mapper.readValue(inputStream, Response.class);
+//                if (response.getType() == ResponseType.AUTHORIZATION_OK) {
+//                    logger.info("Авторизация прошла успешно.");
+//                    putClientInList(userName);
+//                    // serverListenerThread.start();
+//                } else {
+//                    logger.info("Авторизация не удалась: {}", response.getData());
+//                    authorizationListener.getResponse(response.getData());
+//                }
+//            } else {
+//                authorizationListener.getResponse("Server not response!");
+//            }
         } catch (IOException e) {
             logger.error("Не удалось отправить сообщение на сервер", e);
-        } catch (InterruptedException e) {
-
         }
+//        catch (InterruptedException e) {
+//
+//        }
     }
 
     public void connect() {
@@ -98,7 +113,7 @@ public class ChatClient {
             inputStream = socket.getInputStream();
             outputStream = socket.getOutputStream();
             connectListener.connectionAction(true);
-            // serverListenerThread.start();
+            serverListenerThread.start();
         } catch (IOException e) {
             logger.error("Не удалось подключиться к серверу.", e);
             connectListener.connectionAction(false);
@@ -110,9 +125,60 @@ public class ChatClient {
             logger.info("Отправляем сообщение на сервер");
             Request request = new Request(RequestType.MESSAGE, message);
             mapper.writeValue(outputStream, request);
-            messageListener.addNewMessage("Вы", request.getTime(), message);
+            messageListener.addNewMessage(new String(YOU.getBytes(SYSTEM_CHARSET), StandardCharsets.UTF_8), request.getTime(), message);
         } catch (IOException e) {
             logger.error("Не удалось отправить сообщение на сервер", e);
+        }
+    }
+
+    private String clientListToString() {
+        StringBuilder builder = new StringBuilder(clientList.size() * 5);
+        clientList.forEach(client -> builder.append(client + "\n"));
+        return builder.toString();
+    }
+
+    private void putClientInList(String clientName) {
+        clientList.add(clientName);
+        clientListener.updateClientList(clientListToString());
+    }
+
+    private void removeClientFromList(String clientName) {
+        clientList.remove(clientName);
+        clientListener.updateClientList(clientListToString());
+    }
+
+    private void listenServer() {
+        logger.info("Socket is close: {}", socket.isClosed());
+        while (true) {
+            try {
+                int available = inputStream.available();
+                if (available > 0) {
+                    logger.info("Получено сообщение от сервера.");
+                    Response response = mapper.readValue(inputStream, Response.class);
+                    switch (response.getType()) {
+                        case USER_IN_LIST -> putClientInList(response.getUserName());
+                        case USER_IN -> {
+                            messageListener.addNewMessage(response.getUserName(), response.getTime(), USER_IN_MESSAGE);
+                            putClientInList(response.getUserName());
+                        }
+                        case USER_OUT -> {
+                            messageListener.addNewMessage(response.getUserName(), response.getTime(), USER_OUT_MESSAGE);
+                            removeClientFromList(response.getUserName());
+                        }
+                        case MESSAGE -> messageListener.addNewMessage(response.getUserName(), response.getTime(), response.getData());
+                        case AUTHORIZATION_OK -> {
+                            logger.info("Авторизация прошла успешно.");
+                            putClientInList(userName + "(Вы)");
+                        }
+                        case AUTHORIZATION_ERROR -> {
+                            logger.info("Авторизация не удалась: {}", response.getData());
+                            authorizationListener.getResponse(response.getData());
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                logger.error("Слушателю не удалось подключиться к серверу.", e);
+            }
         }
     }
 
@@ -128,22 +194,6 @@ public class ChatClient {
             logger.error("Ошибка остановки потока: ", e);
         } catch (IOException e) {
             logger.error("Ошибка закрытия сокета: ", e);
-        }
-    }
-
-    private void listenServer() {
-        logger.info("Socket is close: {}", socket.isClosed());
-        while (true) {
-            try {
-                int available = inputStream.available();
-                if (available > 0) {
-                    logger.info("Получено сообщение от сервера.");
-                    Response response = mapper.readValue(inputStream, Response.class);
-                    messageListener.addNewMessage(response.getUserName(), response.getTime(), response.getData());
-                }
-            } catch (IOException e) {
-                logger.error("Слушателю не удалось подключиться к серверу.", e);
-            }
         }
     }
 }

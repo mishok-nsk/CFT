@@ -4,6 +4,7 @@ public enum ResponseType {
     MESSAGE,
     AUTHORIZATION_OK,
     AUTHORIZATION_ERROR,
+    USER_IN_LIST,
     USER_IN,
     USER_OUT
 }

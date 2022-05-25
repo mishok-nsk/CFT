@@ -27,9 +27,10 @@ public class ResponseDeserializer extends StdDeserializer {
         }
         String userName = node.get("userName").asText();
         String data = node.get("data").asText();
+        long time = node.get("time").asLong();
         // int timeValue = (Integer) node.get("timeValue").numberValue();
         Response response = new Response(type, userName, data);
-
+        response.setTimeInMillis(time);
         // node.get("time").
         return response;
     }

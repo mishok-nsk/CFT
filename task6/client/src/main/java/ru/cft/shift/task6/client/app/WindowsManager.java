@@ -22,7 +22,7 @@ public class WindowsManager {
         // connectErrorWindow.setExitListener(e -> mainWindow.dispose());
         serverAddressWindow.setExitListener(e -> mainWindow.dispose());
         userNameWindow.setExitListener(e -> mainWindow.dispose());
-        userNameWindow.addUserNameListener(mainWindow::setUserName);
+        // userNameWindow.addUserNameListener(mainWindow::setUserName);
     }
 
     public void setChatClientController(ChatClientController controller) {
@@ -42,6 +42,7 @@ public class WindowsManager {
         });
         chatClient.setAuthorizationListener(userNameWindow::showAuthorizationResponse);
         chatClient.setMessageListener(mainWindow::addMessageToChat);
+        chatClient.setClientListener(mainWindow::updateClientArea);
     }
 
     public void show() {

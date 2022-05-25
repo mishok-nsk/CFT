@@ -18,6 +18,10 @@ public class Request {
         this.data = data;
     }
 
+    public void setTimeInMillis(long millis) {
+        time.setTimeInMillis(millis);
+    }
+
     public String getData() {
         return data;
     }

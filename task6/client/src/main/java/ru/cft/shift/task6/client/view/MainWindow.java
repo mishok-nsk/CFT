@@ -46,10 +46,10 @@ public class MainWindow extends JFrame {
         sendMessageListener.getUserMessage(message);
     }
 
-    public void addMessageToChat(String userName, Calendar time, String message) {
+    public synchronized void addMessageToChat(String userName, Calendar time, String message) {
         try {
-            String user = new String(userName.getBytes(SYSTEM_ENCODING), "UTF-8");
-            chatArea.append(user);
+            // String user = new String(userName.getBytes(SYSTEM_ENCODING), "UTF-8");
+            chatArea.append(userName);
             chatArea.append("[" + time.getTime() + "]: ");
             chatArea.append(message);
             chatArea.append("\n");
@@ -61,6 +61,10 @@ public class MainWindow extends JFrame {
     public void setUserName(String userName) {
         clientArea.append("");
         clientArea.append(userName + "(Вы)\n");
+    }
+
+    public void updateClientArea(String text) {
+        clientArea.setText(text);
     }
 
     public void dispose() {
@@ -89,9 +93,14 @@ public class MainWindow extends JFrame {
 
         clientArea = new JTextArea();
         clientArea.setPreferredSize(new Dimension(200, 300));
+        clientArea.setEnabled(false);
+        clientArea.setDisabledTextColor(Color.BLACK);
         chatArea = new JTextArea();
         Font font = new Font("Verdana", Font.PLAIN, 12);
         chatArea.setFont(font);
+        chatArea.setEnabled(false);
+        chatArea.setDisabledTextColor(Color.BLACK);
+        chatArea.setAutoscrolls(true);
         chatPanel.add(new JScrollPane(clientArea), BorderLayout.WEST);
         chatPanel.add(new JScrollPane(chatArea), BorderLayout.CENTER);
         contentPane.add(chatPanel, BorderLayout.CENTER);
