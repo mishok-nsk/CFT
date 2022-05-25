@@ -1,8 +1,5 @@
 package ru.cft.shift.task5.producers;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class Resource {
     private static volatile int count = 1;
     private final int id;
