@@ -3,14 +3,10 @@ package ru.cft.shift.task6.client.controller;
 import ru.cft.shift.task6.client.model.ChatClient;
 
 public class ChatClientController {
-    private ChatClient chatClient;
+    private final ChatClient chatClient;
 
     public ChatClientController(ChatClient chatClient) {
         this.chatClient = chatClient;
-    }
-
-    public void connect() {
-        chatClient.connect();
     }
 
     public void sendMessage(String message) {

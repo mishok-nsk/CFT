@@ -12,21 +12,18 @@ import java.net.Socket;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+@SuppressWarnings("InfiniteLoopStatement")
 public class Receiver {
     private static final Logger logger = LoggerFactory.getLogger(Receiver.class);
 
-    private ConcurrentHashMap<Socket, String> clients;
-    private List<Socket> unauthorizedClients;
-    private Set<String> userNames;
-    private ObjectMapper mapper;
-    private RequestHandler requestHandler;
-    // AuthorizationListener authorizationListener;
-    // MessageListener messageListener;
+    private final ConcurrentHashMap<Socket, String> clients;
+    private final List<Socket> unauthorizedClients;
+    private final ObjectMapper mapper;
+    private final RequestHandler requestHandler;
 
-    public Receiver(RequestHandler requestHandler, ObjectMapper mapper, ConcurrentHashMap<Socket, String> clients, List<Socket> unauthorizedClients, Set<String> userNames) {
+    public Receiver(RequestHandler requestHandler, ObjectMapper mapper, ConcurrentHashMap<Socket, String> clients, List<Socket> unauthorizedClients) {
         this.clients = clients;
         this.unauthorizedClients = unauthorizedClients;
-        this.userNames = userNames;
         this.mapper = mapper;
         this.requestHandler = requestHandler;
     }
@@ -34,9 +31,7 @@ public class Receiver {
     public void listenClient() {
         while (true) {
             Map<Socket, String> clients;
-            synchronized (this.clients) {
-                clients = new HashMap<>(this.clients);
-            }
+            clients = new HashMap<>(this.clients);
 
             for (Socket client : clients.keySet()) {
                 try {
@@ -46,10 +41,6 @@ public class Receiver {
 
                     if (available > 0) {
                         Request request = mapper.readValue(inputStream, Request.class);
-                        // RequestType requestType= mapper.readValue(inputStream, RequestType.class);
-                        // logger.info("Реквест тайп: {}", requestType);
-                        String userName = clients.get(client);
-                        logger.info("Получено сообщение от клиента {}: {}.", userName, request.getData());
                         requestHandler.sendAllClients(client, request);
                     }
                 } catch (IOException e) {
@@ -85,6 +76,9 @@ public class Receiver {
                     synchronized (unauthorizedClients){
                         unauthorizedClients.remove(client);
                     }
+                } catch (InterruptedException e) {
+                    logger.error("Работа потока прервана.", e);
+                    return;
                 }
             }
         }

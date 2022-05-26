@@ -8,7 +8,6 @@ import java.util.TimeZone;
 @JsonDeserialize(using = RequestDeserializer.class)
 public class Request {
     private final RequestType type;
-    // String userName;
     private final Calendar time;
     private final String data;
 

@@ -2,23 +2,21 @@ package ru.cft.shift.task6.client.view;
 
 import ru.cft.shift.task6.client.model.MessageListener;
 import ru.cft.shift.task6.common.Message;
+import ru.cft.shift.task6.common.UIString;
 
 import javax.swing.*;
 import java.awt.*;
-import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 
 public class MainWindow extends JFrame implements MessageListener {
     private static final int MAX_MESSAGE_SIZE = 300;
-    public static final String SYSTEM_ENCODING = "windows-1251";
+    private static final String USER = "Пользователь ";
     private final Container contentPane;
     private JTextArea messageArea;
     private JTextArea chatArea;
     private JTextArea clientArea;
     private SendMessageListener sendMessageListener;
     private ExitListener exitListener;
-
-    // private final GridLayout mainLayout;
 
     public MainWindow() {
         super("Chat client");
@@ -32,7 +30,6 @@ public class MainWindow extends JFrame implements MessageListener {
 
         createContent();
         pack();
-        //setVisible(true);
     }
 
     public void setMessageListener(SendMessageListener listener) {
@@ -46,29 +43,18 @@ public class MainWindow extends JFrame implements MessageListener {
     public void sendMessage() {
         String message = messageArea.getText();
         messageArea.setText("");
-        // addMessageToChat(message);
         sendMessageListener.getUserMessage(message);
     }
 
     public synchronized void addMessageToChat(String userName, Calendar time, String message) {
-        try {
-            // String user = new String(userName.getBytes(SYSTEM_ENCODING), "UTF-8");
-            chatArea.append(userName);
-            chatArea.append("[" + time.getTime() + "]: ");
-            chatArea.append(message);
-            chatArea.append("\n");
-        } catch (Exception e) {
-
-        }
+        chatArea.append(userName);
+        chatArea.append("[" + time.getTime() + "]: ");
+        chatArea.append(message);
+        chatArea.append("\n");
     }
 
     public void setUserName(String userName) {
-        clientArea.append("");
-        clientArea.append(userName + "(Вы)\n");
-    }
-
-    public void updateClientArea(String text) {
-        clientArea.setText(text);
+        this.setTitle("Chat client ( Nick: " + userName + " )");
     }
 
     public void dispose() {
@@ -100,13 +86,14 @@ public class MainWindow extends JFrame implements MessageListener {
         clientArea.setEnabled(false);
         clientArea.setDisabledTextColor(Color.BLACK);
         chatArea = new JTextArea();
-        Font font = new Font("Verdana", Font.PLAIN, 12);
-        chatArea.setFont(font);
         chatArea.setEnabled(false);
         chatArea.setDisabledTextColor(Color.BLACK);
-        chatArea.setAutoscrolls(true);
+        chatArea.setLineWrap(true);
+        chatArea.setWrapStyleWord(true);
+        JScrollPane jScrollPane = new JScrollPane(chatArea);
+        jScrollPane.setAutoscrolls(true);
         chatPanel.add(new JScrollPane(clientArea), BorderLayout.WEST);
-        chatPanel.add(new JScrollPane(chatArea), BorderLayout.CENTER);
+        chatPanel.add(jScrollPane, BorderLayout.CENTER);
         contentPane.add(chatPanel, BorderLayout.CENTER);
     }
 
@@ -117,8 +104,13 @@ public class MainWindow extends JFrame implements MessageListener {
 
     @Override
     public void addUserMessage(String userName, String text) {
-        chatArea.append(userName + " ");
+        chatArea.append(UIString.encoding(USER) + userName + " ");
         chatArea.append(text);
         chatArea.append("\n");
+    }
+
+    @Override
+    public void updateClientList(String text) {
+        clientArea.setText(text);
     }
 }

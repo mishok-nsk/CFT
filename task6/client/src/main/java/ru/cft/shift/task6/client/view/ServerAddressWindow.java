@@ -9,8 +9,8 @@ public class ServerAddressWindow extends JDialog {
     public static final String DEFAULT_ADDRESS = "127.0.0.1";
     private ClientParameterListener serverAddressListener;
     private ActionListener exitListener;
-    private JTextField serverAddress;
-    private JLabel label;
+    private final JTextField serverAddress;
+    private final JLabel label;
 
     public ServerAddressWindow(JFrame owner) {
         super(owner, "Connection server address", true);
@@ -42,7 +42,6 @@ public class ServerAddressWindow extends JDialog {
 
     public void showConnectionError() {
         label.setText(CONNECTION_ERROR);
-        // serverAddress.setText();
         showYourself();
     }
 
@@ -75,7 +74,6 @@ public class ServerAddressWindow extends JDialog {
         gbc.gridwidth = 2;
         gbc.gridheight = 1;
         gbc.insets = new Insets(10, 0, 0, 0);
-        // gbc.fill = GridBagConstraints.HORIZONTAL;
         layout.setConstraints(textField, gbc);
         return textField;
     }

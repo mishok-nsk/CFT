@@ -13,20 +13,18 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import ru.cft.shift.task6.client.view.ClientListener;
 import ru.cft.shift.task6.common.*;
 
 public class ChatClient {
     private static final Logger logger = LoggerFactory.getLogger(ChatClient.class);
-    public static final String CHARSET_NAME = "UTF-8";
-    public static final String SYSTEM_CHARSET = "windows-1251";
+
     public static final String YOU = "Вы";
-    public static final String USER_OUT_MESSAGE = "Пользователь покинул чат!";
-    public static final String USER_IN_MESSAGE = "Пользователь присоединился к чату";
-    public static final String USER_NAME_BLANK = "Имя пользователя пустое";
+    public static final String USER_OUT_MESSAGE = "покинул(а) чат!";
+    public static final String USER_IN_MESSAGE = "присоединил(ся/ась) к чату!";
+    public static final String USER_NAME_BLANK = "имя пользователя пустое";
+
     private final int port;
     private String host = "127.0.0.1";
     private String userName = "anonymous";
@@ -35,19 +33,16 @@ public class ChatClient {
     private InputStream inputStream;
     private OutputStream outputStream;
     ObjectMapper mapper;
-    // private String message = " ";
+
     private Thread serverListenerThread;
     private MessageListener messageListener;
     private ConnectListener connectListener;
     private AuthorizationListener authorizationListener;
-    private ClientListener clientListener;
+    // private ClientListener clientListener;
 
     public ChatClient(int port) {
         this.port = port;
-        JsonFactory jsonFactory = new JsonFactory();
-        jsonFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET,false);
-        jsonFactory.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, false);
-        mapper = new ObjectMapper(jsonFactory);
+        initMapper();
     }
 
     public void setHost(String host) {
@@ -56,7 +51,7 @@ public class ChatClient {
 
     public void setUserName(String userName) {
         if (userName.isBlank()) {
-            authorizationListener.getResponse(USER_NAME_BLANK);
+            authorizationListener.getResponse(UIString.encoding(USER_NAME_BLANK));
             return;
         }
         this.userName = userName;
@@ -73,10 +68,6 @@ public class ChatClient {
 
     public void setAuthorizationListener(AuthorizationListener authorizationListener) {
         this.authorizationListener = authorizationListener;
-    }
-
-    public void setClientListener(ClientListener listener) {
-        clientListener = listener;
     }
 
     private void authorization() {
@@ -110,7 +101,7 @@ public class ChatClient {
             logger.info("Отправляем сообщение на сервер");
             Request request = new Request(RequestType.MESSAGE, message);
             mapper.writeValue(outputStream, request);
-            Message messageData = new Message(new String(YOU.getBytes(SYSTEM_CHARSET), StandardCharsets.UTF_8), message);
+            Message messageData = new Message(UIString.encoding(YOU), message);
             messageListener.addNewMessage(messageData);
         } catch (IOException e) {
             logger.error("Не удалось отправить сообщение на сервер", e);
@@ -123,6 +114,7 @@ public class ChatClient {
                 serverListenerThread.interrupt();
             }
             if (socket != null) {
+                mapper.writeValue(outputStream, new Request(RequestType.EXIT, ""));
                 socket.close();
             }
         } catch (SecurityException e) {
@@ -132,27 +124,33 @@ public class ChatClient {
         }
     }
 
+    private void initMapper() {
+        JsonFactory jsonFactory = new JsonFactory();
+        jsonFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET,false);
+        jsonFactory.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, false);
+        mapper = new ObjectMapper(jsonFactory);
+    }
+
     private String clientListToString() {
         StringBuilder builder = new StringBuilder(clientList.size() * 5);
-        clientList.forEach(client -> builder.append(client + "\n"));
+        clientList.forEach(client -> builder.append(client).append("\n"));
         return builder.toString();
     }
 
     private void setUserList(Set<String> userList) {
         clientList = new HashSet<>(userList);
-        clientList.add(userName);
-        clientListener.updateClientList(clientListToString());
+        messageListener.updateClientList(clientListToString());
     }
 
     private void putClientInList(String clientName) {
         logger.info("Добавление юзера {} в список пользователей.", clientName);
         clientList.add(clientName);
-        clientListener.updateClientList(clientListToString());
+        messageListener.updateClientList(clientListToString());
     }
 
     private void removeClientFromList(String clientName) {
         clientList.remove(clientName);
-        clientListener.updateClientList(clientListToString());
+        messageListener.updateClientList(clientListToString());
     }
 
     private void listenServer() {
@@ -162,32 +160,8 @@ public class ChatClient {
                 int available = inputStream.available();
                 if (available > 0) {
                     logger.info("Получено сообщение от сервера.");
-                    // Response<? extends Object> response = read(inputStream, mapper);
-                    String jsonResponse = new String(inputStream.readNBytes(available), CHARSET_NAME);
-                    Response<? extends Object> response = parseResponse(jsonResponse);
-                    switch (response.getType()) {
-                        case USER_LIST -> setUserList((HashSet<String>) response.getData());
-                        case USER_IN -> {
-                            String userName = (String) response.getData();
-                            messageListener.addUserMessage(userName, USER_IN_MESSAGE);
-                            putClientInList(userName);
-                        }
-                        case USER_OUT -> {
-                            String userName = (String) response.getData();
-                            messageListener.addUserMessage(userName, USER_OUT_MESSAGE);
-                            removeClientFromList(userName);
-                        }
-                        case MESSAGE -> messageListener.addNewMessage((Message) response.getData());
-                        case AUTHORIZATION_OK -> {
-                            logger.info("Авторизация прошла успешно.");
-                            putClientInList(userName + "(Вы)");
-                        }
-                        case AUTHORIZATION_ERROR -> {
-                            logger.info("Авторизация не удалась: {}", response.getData());
-                            authorizationListener.getResponse((String) response.getData());
-                        }
-                        default -> logger.error("Неизвестный тип ответа от сервера.");
-                    }
+                    String jsonResponse = new String(inputStream.readNBytes(available), StandardCharsets.UTF_8);
+                    handleResponse(jsonResponse);
                 }
             } catch (IOException e) {
                 logger.error("Слушателю не удалось подключиться к серверу.", e);
@@ -195,7 +169,31 @@ public class ChatClient {
         }
     }
 
-    private Response<? extends Object> parseResponse(String jsonResponse) {
+    private void handleResponse(String jsonResponse) {
+        Response<?> response = parseResponse(jsonResponse);
+        switch (response.getType()) {
+            case USER_LIST -> setUserList((HashSet<String>) response.getData());
+            case USER_IN -> {
+                String userName = (String) response.getData();
+                messageListener.addUserMessage(userName, UIString.encoding(USER_IN_MESSAGE));
+                putClientInList(userName);
+            }
+            case USER_OUT -> {
+                String userName = (String) response.getData();
+                messageListener.addUserMessage(userName, UIString.encoding(USER_OUT_MESSAGE));
+                removeClientFromList(userName);
+            }
+            case MESSAGE -> messageListener.addNewMessage((Message) response.getData());
+            case AUTHORIZATION_OK -> logger.info("Авторизация прошла успешно.");
+            case AUTHORIZATION_ERROR -> {
+                logger.info("Авторизация не удалась: {}", response.getData());
+                authorizationListener.getResponse((String) response.getData());
+            }
+            default -> logger.error("Неизвестный тип ответа от сервера.");
+        }
+    }
+
+    private Response<?> parseResponse(String jsonResponse) {
         try {
             String types = mapper.readTree(jsonResponse).get("type").asText();
             ResponseType type = ResponseType.MESSAGE;
@@ -205,18 +203,17 @@ public class ChatClient {
                 }
             }
             logger.info("Json {}", jsonResponse);
-            Response<? extends Object> response;
+            Response<?> response;
             switch (type) {
                 case MESSAGE -> response = Response.read(jsonResponse, mapper, Message.class);
-                case USER_IN, USER_OUT, AUTHORIZATION_ERROR, AUTHORIZATION_OK -> response = Response.<String>read(jsonResponse, mapper, String.class);
+                case USER_IN, USER_OUT, AUTHORIZATION_ERROR, AUTHORIZATION_OK -> response = Response.read(jsonResponse, mapper, String.class);
                 case USER_LIST -> response = Response.read(jsonResponse, mapper, HashSet.class);
                 default -> throw new Exception("Неизвестный тип ответа от сервера.");
             }
             logger.info("Сообщение: {}, {}", response.getType(), response.getData());
             return response;
         } catch (Exception e) {
-            Response<Object> response = new Response<>(null);
-            return response;
+            return new Response<>(null);
         }
     }
 }

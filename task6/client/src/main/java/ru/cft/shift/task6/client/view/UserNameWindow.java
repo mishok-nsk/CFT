@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserNameWindow extends JDialog {
-    private List<ClientParameterListener> userNameListener = new ArrayList<>();
+    private final List<ClientParameterListener> userNameListener = new ArrayList<>();
     private ActionListener exitListener;
-    private JTextField userName;
-    private JLabel label;
+    private final JTextField userName;
+    private final JLabel label;
 
     public UserNameWindow(JFrame owner) {
         super(owner, "User name dialog", true);
@@ -95,7 +95,6 @@ public class UserNameWindow extends JDialog {
         gbc.gridwidth = 1;
         gbc.gridheight = 1;
         gbc.weightx = 0.5;
-        // gbc.insets = new Insets(15, 0, 0, 0);
         layout.setConstraints(okButton, gbc);
 
         return okButton;

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import java.io.IOException;
-import java.util.Calendar;
 
 public class RequestDeserializer extends StdDeserializer<Request> {
     public RequestDeserializer() {
@@ -28,9 +27,7 @@ public class RequestDeserializer extends StdDeserializer<Request> {
         }
         String data = node.get("data").asText();
         long time = node.get("time").asLong();
-        // int timeValue = (Integer) node.get("timeValue").numberValue();
         Request request = new Request(type, data);
-        // node.get("time").
         request.setTimeInMillis(time);
         return request;
     }

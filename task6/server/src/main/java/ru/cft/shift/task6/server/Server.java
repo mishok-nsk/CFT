@@ -6,8 +6,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.cft.shift.task6.common.Response;
-import ru.cft.shift.task6.common.ResponseType;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -23,37 +21,29 @@ public class Server implements Runnable{
     private final int port;
     private final List<Socket> unauthorizedClients = new ArrayList<>();
     private final ConcurrentHashMap<Socket, String> clients = new ConcurrentHashMap<>();
-    private final Set<String> userNames = new HashSet<>();
-    private final ObjectMapper mapper;
     private final Receiver receiver;
-    private final RequestHandler requestHandler;
     private boolean isStop;
 
     public Server(int port) {
         this.port = port;
-        JsonFactory jsonFactory = new JsonFactory();
-        jsonFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET,false);
-        jsonFactory.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, false);
-        mapper = new ObjectMapper(jsonFactory);
-        requestHandler = new RequestHandler(mapper, clients, unauthorizedClients, userNames);
-        receiver = new Receiver(requestHandler, mapper, clients, unauthorizedClients, userNames);
+        ObjectMapper mapper = createMapper();
+        RequestHandler requestHandler = new RequestHandler(mapper, clients, unauthorizedClients);
+        receiver = new Receiver(requestHandler, mapper, clients, unauthorizedClients);
     }
 
     public void run() {
-        Thread clientThread = new Thread(receiver::listenClient);
-        clientThread.setDaemon(true);
-
-        Thread unauthorizedClientThread = new Thread(receiver::authorizationClient);
-        unauthorizedClientThread.setDaemon(true);
-
         try (ServerSocket serverSocket = new ServerSocket(port)) {
+            Thread clientThread = new Thread(receiver::listenClient);
+            clientThread.setDaemon(true);
+            Thread unauthorizedClientThread = new Thread(receiver::authorizationClient);
+            unauthorizedClientThread.setDaemon(true);
+
             logger.info("Запускаем поток сервера. Host: {}", serverSocket.getInetAddress());
             unauthorizedClientThread.start();
             clientThread.start();
             serverSocket.setSoTimeout(TIMEOUT);
 
             while (!isStop) {
-                // logger.info("Сервер ожидает подключения клиентов.");
                 Socket socket;
                 try {
                     socket = serverSocket.accept();
@@ -66,7 +56,7 @@ public class Server implements Runnable{
                 }
             }
         } catch (IOException e) {
-
+            logger.error("Не удалось создать сокет сервера.", e);
         } finally {
             closeAllClients();
         }
@@ -74,6 +64,13 @@ public class Server implements Runnable{
 
     public void stop() {
         isStop = true;
+    }
+
+    private ObjectMapper createMapper() {
+        JsonFactory jsonFactory = new JsonFactory();
+        jsonFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET,false);
+        jsonFactory.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, false);
+        return new ObjectMapper(jsonFactory);
     }
 
     private void closeAllClients() {

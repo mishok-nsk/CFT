@@ -1,11 +1,8 @@
 package ru.cft.shift.task6.common;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-
 import java.util.Calendar;
 import java.util.TimeZone;
 
-@JsonAutoDetect
 public class Message {
     private String userName;
     private Calendar time;
