@@ -16,8 +16,8 @@ public class Main {
 
             Scanner sc = new Scanner(System.in);
             sc.nextLine();
-            serverThread.interrupt();
-            // server.stop();
+            // serverThread.interrupt();
+            server.stop();
             logger.info("Завершение работы приложения");
         } catch (Exception e) {
             logger.error("Ошибка", e);

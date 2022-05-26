@@ -1,11 +1,14 @@
 package ru.cft.shift.task6.client.view;
 
+import ru.cft.shift.task6.client.model.MessageListener;
+import ru.cft.shift.task6.common.Message;
+
 import javax.swing.*;
 import java.awt.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 
-public class MainWindow extends JFrame {
+public class MainWindow extends JFrame implements MessageListener {
     private static final int MAX_MESSAGE_SIZE = 300;
     public static final String SYSTEM_ENCODING = "windows-1251";
     private final Container contentPane;
@@ -14,6 +17,7 @@ public class MainWindow extends JFrame {
     private JTextArea clientArea;
     private SendMessageListener sendMessageListener;
     private ExitListener exitListener;
+
     // private final GridLayout mainLayout;
 
     public MainWindow() {
@@ -104,5 +108,17 @@ public class MainWindow extends JFrame {
         chatPanel.add(new JScrollPane(clientArea), BorderLayout.WEST);
         chatPanel.add(new JScrollPane(chatArea), BorderLayout.CENTER);
         contentPane.add(chatPanel, BorderLayout.CENTER);
+    }
+
+    @Override
+    public void addNewMessage(Message message) {
+        addMessageToChat(message.getUserName(), message.getTime(), message.getText());
+    }
+
+    @Override
+    public void addUserMessage(String userName, String text) {
+        chatArea.append(userName + " ");
+        chatArea.append(text);
+        chatArea.append("\n");
     }
 }

@@ -41,7 +41,7 @@ public class WindowsManager {
             }
         });
         chatClient.setAuthorizationListener(userNameWindow::showAuthorizationResponse);
-        chatClient.setMessageListener(mainWindow::addMessageToChat);
+        chatClient.setMessageListener(mainWindow);
         chatClient.setClientListener(mainWindow::updateClientArea);
     }
 

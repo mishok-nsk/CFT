@@ -14,6 +14,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Server implements Runnable{
     private static final Logger logger = LoggerFactory.getLogger(Server.class);
@@ -21,7 +22,7 @@ public class Server implements Runnable{
 
     private final int port;
     private final List<Socket> unauthorizedClients = new ArrayList<>();
-    private final Map<Socket, String> clients = new HashMap<>();
+    private final ConcurrentHashMap<Socket, String> clients = new ConcurrentHashMap<>();
     private final Set<String> userNames = new HashSet<>();
     private final ObjectMapper mapper;
     private final Receiver receiver;
@@ -52,7 +53,7 @@ public class Server implements Runnable{
             serverSocket.setSoTimeout(TIMEOUT);
 
             while (!isStop) {
-                logger.info("Сервер ожидает подключения клиентов.");
+                // logger.info("Сервер ожидает подключения клиентов.");
                 Socket socket;
                 try {
                     socket = serverSocket.accept();

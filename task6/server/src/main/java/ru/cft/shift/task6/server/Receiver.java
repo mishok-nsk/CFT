@@ -10,11 +10,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Receiver {
     private static final Logger logger = LoggerFactory.getLogger(Receiver.class);
 
-    private Map<Socket, String> clients;
+    private ConcurrentHashMap<Socket, String> clients;
     private List<Socket> unauthorizedClients;
     private Set<String> userNames;
     private ObjectMapper mapper;
@@ -22,7 +23,7 @@ public class Receiver {
     // AuthorizationListener authorizationListener;
     // MessageListener messageListener;
 
-    public Receiver(RequestHandler requestHandler, ObjectMapper mapper, Map<Socket, String> clients, List<Socket> unauthorizedClients, Set<String> userNames) {
+    public Receiver(RequestHandler requestHandler, ObjectMapper mapper, ConcurrentHashMap<Socket, String> clients, List<Socket> unauthorizedClients, Set<String> userNames) {
         this.clients = clients;
         this.unauthorizedClients = unauthorizedClients;
         this.userNames = userNames;
@@ -45,6 +46,8 @@ public class Receiver {
 
                     if (available > 0) {
                         Request request = mapper.readValue(inputStream, Request.class);
+                        // RequestType requestType= mapper.readValue(inputStream, RequestType.class);
+                        // logger.info("Реквест тайп: {}", requestType);
                         String userName = clients.get(client);
                         logger.info("Получено сообщение от клиента {}: {}.", userName, request.getData());
                         requestHandler.sendAllClients(client, request);

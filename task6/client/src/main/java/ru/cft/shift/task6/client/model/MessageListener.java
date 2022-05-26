@@ -1,7 +1,9 @@
 package ru.cft.shift.task6.client.model;
 
-import java.util.Calendar;
+import ru.cft.shift.task6.common.Message;
+
 
 public interface MessageListener {
-    void addNewMessage(String userName, Calendar time, String message);
+    void addNewMessage(Message message);
+    void addUserMessage(String userName, String message);
 }
