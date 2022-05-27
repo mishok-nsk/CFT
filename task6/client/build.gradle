@@ -1,7 +1,9 @@
+
 plugins {
     id 'java'
 }
 
+compileJava.options.encoding = 'UTF-8'
 group 'org.example'
 version '1.0-SNAPSHOT'
 
@@ -16,5 +18,4 @@ dependencies {
     implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.11'
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.29'
     implementation project(':task6:common')
-//    implementation 'ru.cft.shift.task6.common'
 }

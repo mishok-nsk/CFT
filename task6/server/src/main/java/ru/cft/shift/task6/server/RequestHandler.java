@@ -59,7 +59,7 @@ public class RequestHandler {
             Response<String> response;
             if (userNames.contains(userName)) {
                 response = new Response(ResponseType.AUTHORIZATION_ERROR);
-                response.setData(UIString.encoding(USER_NAME_ERROR));
+                response.setData(USER_NAME_ERROR);
                 mapper.writeValue(client.getOutputStream(), response);
                 logger.info("Логин {} уже занят.", userName);
             } else {

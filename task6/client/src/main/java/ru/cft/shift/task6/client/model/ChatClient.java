@@ -17,7 +17,7 @@ import java.util.Set;
 
 import ru.cft.shift.task6.common.*;
 
-public class ChatClient {
+public class ChatClient implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(ChatClient.class);
 
     public static final String YOU = "Вы";
@@ -51,7 +51,7 @@ public class ChatClient {
 
     public void setUserName(String userName) {
         if (userName.isBlank()) {
-            authorizationListener.getResponse(UIString.encoding(USER_NAME_BLANK));
+            authorizationListener.getResponse(USER_NAME_BLANK);
             return;
         }
         this.userName = userName;
@@ -81,7 +81,7 @@ public class ChatClient {
     }
 
     public void connect() {
-        serverListenerThread = new Thread(this::listenServer);
+        serverListenerThread = new Thread(this);
         serverListenerThread.setDaemon(true);
 
         try {
@@ -101,7 +101,7 @@ public class ChatClient {
             logger.info("Отправляем сообщение на сервер");
             Request request = new Request(RequestType.MESSAGE, message);
             mapper.writeValue(outputStream, request);
-            Message messageData = new Message(UIString.encoding(YOU), message);
+            Message messageData = new Message(YOU, message);
             messageListener.addNewMessage(messageData);
         } catch (IOException e) {
             logger.error("Не удалось отправить сообщение на сервер", e);
@@ -117,6 +117,7 @@ public class ChatClient {
                 mapper.writeValue(outputStream, new Request(RequestType.EXIT, ""));
                 socket.close();
             }
+
         } catch (SecurityException e) {
             logger.error("Ошибка остановки потока: ", e);
         } catch (IOException e) {
@@ -153,7 +154,7 @@ public class ChatClient {
         messageListener.updateClientList(clientListToString());
     }
 
-    private void listenServer() {
+    public void run() {
         logger.info("Socket is close: {}", socket.isClosed());
         while (true) {
             try {
@@ -175,12 +176,12 @@ public class ChatClient {
             case USER_LIST -> setUserList((HashSet<String>) response.getData());
             case USER_IN -> {
                 String userName = (String) response.getData();
-                messageListener.addUserMessage(userName, UIString.encoding(USER_IN_MESSAGE));
+                messageListener.addUserMessage(userName, USER_IN_MESSAGE);
                 putClientInList(userName);
             }
             case USER_OUT -> {
                 String userName = (String) response.getData();
-                messageListener.addUserMessage(userName, UIString.encoding(USER_OUT_MESSAGE));
+                messageListener.addUserMessage(userName, USER_OUT_MESSAGE);
                 removeClientFromList(userName);
             }
             case MESSAGE -> messageListener.addNewMessage((Message) response.getData());

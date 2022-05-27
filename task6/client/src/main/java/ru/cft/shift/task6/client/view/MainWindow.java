@@ -2,7 +2,6 @@ package ru.cft.shift.task6.client.view;
 
 import ru.cft.shift.task6.client.model.MessageListener;
 import ru.cft.shift.task6.common.Message;
-import ru.cft.shift.task6.common.UIString;
 
 import javax.swing.*;
 import java.awt.*;
@@ -104,7 +103,7 @@ public class MainWindow extends JFrame implements MessageListener {
 
     @Override
     public void addUserMessage(String userName, String text) {
-        chatArea.append(UIString.encoding(USER) + userName + " ");
+        chatArea.append(USER + userName + " ");
         chatArea.append(text);
         chatArea.append("\n");
     }
