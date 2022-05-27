@@ -22,7 +22,6 @@ public class Server implements Runnable{
     private final List<Socket> unauthorizedClients = new ArrayList<>();
     private final ConcurrentHashMap<Socket, String> clients = new ConcurrentHashMap<>();
     private final Receiver receiver;
-    private boolean isStop;
 
     public Server(int port) {
         this.port = port;
@@ -43,14 +42,14 @@ public class Server implements Runnable{
             clientThread.start();
             serverSocket.setSoTimeout(TIMEOUT);
 
-            while (!isStop) {
+            while (!Thread.interrupted()) {
                 Socket socket;
                 try {
                     socket = serverSocket.accept();
                 } catch (SocketTimeoutException e) {
                     continue;
                 }
-                logger.info("Клиент подключился. {}", socket);
+                logger.info("Клиент подключился.");
                 synchronized (unauthorizedClients) {
                     unauthorizedClients.add(socket);
                 }
@@ -58,12 +57,9 @@ public class Server implements Runnable{
         } catch (IOException e) {
             logger.error("Не удалось создать сокет сервера.", e);
         } finally {
+            logger.info("Закрываем сокеты.");
             closeAllClients();
         }
-    }
-
-    public void stop() {
-        isStop = true;
     }
 
     private ObjectMapper createMapper() {
@@ -74,15 +70,14 @@ public class Server implements Runnable{
     }
 
     private void closeAllClients() {
-        synchronized (clients) {
-            for (Socket client : clients.keySet()) {
-                try {
-                    client.close();
-                } catch (Exception ignore) {
-                }
+        for (Socket client : clients.keySet()) {
+            try {
+                client.close();
+            } catch (Exception ignore) {
             }
-            clients.clear();
         }
+        clients.clear();
+
         synchronized (unauthorizedClients) {
             for (Socket client : unauthorizedClients) {
                 try {

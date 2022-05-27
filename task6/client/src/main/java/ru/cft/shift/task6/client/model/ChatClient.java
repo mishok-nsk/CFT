@@ -11,13 +11,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
 import ru.cft.shift.task6.common.*;
 
-public class ChatClient implements Runnable {
+public class ChatClient implements ResponseHandler{
     private static final Logger logger = LoggerFactory.getLogger(ChatClient.class);
 
     public static final String YOU = "Вы";
@@ -30,7 +29,6 @@ public class ChatClient implements Runnable {
     private String userName = "anonymous";
     private Set<String> clientList = new HashSet<>();
     private Socket socket;
-    private InputStream inputStream;
     private OutputStream outputStream;
     ObjectMapper mapper;
 
@@ -38,7 +36,6 @@ public class ChatClient implements Runnable {
     private MessageListener messageListener;
     private ConnectListener connectListener;
     private AuthorizationListener authorizationListener;
-    // private ClientListener clientListener;
 
     public ChatClient(int port) {
         this.port = port;
@@ -81,15 +78,14 @@ public class ChatClient implements Runnable {
     }
 
     public void connect() {
-        serverListenerThread = new Thread(this);
-        serverListenerThread.setDaemon(true);
-
         try {
             socket = new Socket(host, port);
-            inputStream = socket.getInputStream();
+            InputStream inputStream = socket.getInputStream();
             outputStream = socket.getOutputStream();
-            connectListener.connectionAction(true);
+            ServerListener serverListener = new ServerListener(inputStream, this);
+            serverListenerThread = new Thread(serverListener);
             serverListenerThread.start();
+            connectListener.connectionAction(true);
         } catch (IOException e) {
             logger.error("Не удалось подключиться к серверу.", e);
             connectListener.connectionAction(false);
@@ -108,7 +104,35 @@ public class ChatClient implements Runnable {
         }
     }
 
+    public void handleResponse(String jsonResponse) {
+        Response<?> response = parseResponse(jsonResponse);
+        switch (response.getType()) {
+            case USER_LIST -> setUserList((HashSet<String>) response.getData());
+            case USER_IN -> {
+                String userName = (String) response.getData();
+                messageListener.addUserMessage(userName, USER_IN_MESSAGE);
+                putClientInList(userName);
+            }
+            case USER_OUT -> {
+                String userName = (String) response.getData();
+                messageListener.addUserMessage(userName, USER_OUT_MESSAGE);
+                removeClientFromList(userName);
+            }
+            case MESSAGE -> {
+                logger.info("Получено сообщение: {}", response.getData());
+                messageListener.addNewMessage((Message) response.getData());
+            }
+            case AUTHORIZATION_OK -> logger.info("Авторизация прошла успешно.");
+            case AUTHORIZATION_ERROR -> {
+                logger.info("Авторизация не удалась: {}", response.getData());
+                authorizationListener.getResponse((String) response.getData());
+            }
+            default -> logger.error("Неизвестный тип ответа от сервера.");
+        }
+    }
+
     public void stop() {
+        logger.info("Закрываем подключение.");
         try {
             if (serverListenerThread != null) {
                 serverListenerThread.interrupt();
@@ -139,6 +163,7 @@ public class ChatClient implements Runnable {
     }
 
     private void setUserList(Set<String> userList) {
+        logger.info("Заволняем список пользователей в чате.");
         clientList = new HashSet<>(userList);
         messageListener.updateClientList(clientListToString());
     }
@@ -150,48 +175,9 @@ public class ChatClient implements Runnable {
     }
 
     private void removeClientFromList(String clientName) {
+        logger.info("Юзер {} вышел из чата.", clientName);
         clientList.remove(clientName);
         messageListener.updateClientList(clientListToString());
-    }
-
-    public void run() {
-        logger.info("Socket is close: {}", socket.isClosed());
-        while (true) {
-            try {
-                int available = inputStream.available();
-                if (available > 0) {
-                    logger.info("Получено сообщение от сервера.");
-                    String jsonResponse = new String(inputStream.readNBytes(available), StandardCharsets.UTF_8);
-                    handleResponse(jsonResponse);
-                }
-            } catch (IOException e) {
-                logger.error("Слушателю не удалось подключиться к серверу.", e);
-            }
-        }
-    }
-
-    private void handleResponse(String jsonResponse) {
-        Response<?> response = parseResponse(jsonResponse);
-        switch (response.getType()) {
-            case USER_LIST -> setUserList((HashSet<String>) response.getData());
-            case USER_IN -> {
-                String userName = (String) response.getData();
-                messageListener.addUserMessage(userName, USER_IN_MESSAGE);
-                putClientInList(userName);
-            }
-            case USER_OUT -> {
-                String userName = (String) response.getData();
-                messageListener.addUserMessage(userName, USER_OUT_MESSAGE);
-                removeClientFromList(userName);
-            }
-            case MESSAGE -> messageListener.addNewMessage((Message) response.getData());
-            case AUTHORIZATION_OK -> logger.info("Авторизация прошла успешно.");
-            case AUTHORIZATION_ERROR -> {
-                logger.info("Авторизация не удалась: {}", response.getData());
-                authorizationListener.getResponse((String) response.getData());
-            }
-            default -> logger.error("Неизвестный тип ответа от сервера.");
-        }
     }
 
     private Response<?> parseResponse(String jsonResponse) {
@@ -203,7 +189,6 @@ public class ChatClient implements Runnable {
                     type = stdType;
                 }
             }
-            logger.info("Json {}", jsonResponse);
             Response<?> response;
             switch (type) {
                 case MESSAGE -> response = Response.read(jsonResponse, mapper, Message.class);
@@ -211,7 +196,6 @@ public class ChatClient implements Runnable {
                 case USER_LIST -> response = Response.read(jsonResponse, mapper, HashSet.class);
                 default -> throw new Exception("Неизвестный тип ответа от сервера.");
             }
-            logger.info("Сообщение: {}, {}", response.getType(), response.getData());
             return response;
         } catch (Exception e) {
             return new Response<>(null);

@@ -18,7 +18,7 @@ public class Main {
 
             Scanner sc = new Scanner(System.in);
             sc.nextLine();
-            server.stop();
+            serverThread.interrupt();
             logger.info("Завершение работы приложения");
         } catch (IllegalStateException e) {
             logger.error("Ошибка запуска потока сервера", e);

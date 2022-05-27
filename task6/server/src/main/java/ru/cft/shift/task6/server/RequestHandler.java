@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static java.lang.Thread.sleep;
 
 public class RequestHandler {
-    public static final String USER_NAME_ERROR = "Пользователь с таким именем уже в чате!";
+    public static final String USER_NAME_ERROR = "Логин уже занят!";
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
     private final ObjectMapper mapper;
     private final ConcurrentHashMap<Socket, String> clients;
@@ -31,8 +31,8 @@ public class RequestHandler {
     public void sendAllClients(Socket client, Request request) {
         String userName = clients.get(client);
         if (request.getRequestType() == RequestType.EXIT) {
-            deleteDisconnectedClient(client);
             logger.info("Пользователь {} закрыл приложение.", userName);
+            deleteDisconnectedClient(client);
             return;
         }
         logger.info("Получено сообщение от клиента {}: {}.", userName, request.getData());
@@ -58,12 +58,12 @@ public class RequestHandler {
             logger.info("Авторизация клиента {}.", userName);
             Response<String> response;
             if (userNames.contains(userName)) {
-                response = new Response(ResponseType.AUTHORIZATION_ERROR);
+                response = new Response<>(ResponseType.AUTHORIZATION_ERROR);
                 response.setData(USER_NAME_ERROR);
                 mapper.writeValue(client.getOutputStream(), response);
                 logger.info("Логин {} уже занят.", userName);
             } else {
-                response = new Response(ResponseType.AUTHORIZATION_OK);
+                response = new Response<>(ResponseType.AUTHORIZATION_OK);
                 logger.info("Клиент {} авторизирован.", userName);
                 mapper.writeValue(client.getOutputStream(), response);
                 sleep(100);
@@ -85,7 +85,7 @@ public class RequestHandler {
     }
 
     private void sendToAllUserStatus(String userName, ResponseType type) {
-        Response<String> response = new Response(type);
+        Response<String> response = new Response<>(type);
         response.setData(userName);
         clients.keySet().forEach(outputClient -> {
             try {
@@ -108,7 +108,7 @@ public class RequestHandler {
 
     private void sendUserNames(Socket receiver) {
         try {
-            Response<Set<String>> response = new Response(ResponseType.USER_LIST);
+            Response<Set<String>> response = new Response<>(ResponseType.USER_LIST);
             response.setData(userNames);
             mapper.writeValue(receiver.getOutputStream(), response);
         } catch (IOException e) {

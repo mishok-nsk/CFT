@@ -44,6 +44,6 @@ public class Message {
 
     @Override
     public String toString() {
-        return "User: " + userName + " Текст: " + text;
+        return "User: " + userName + " Text: " + text;
     }
 }
