@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -77,6 +78,12 @@ public class ChatClient implements ResponseHandler{
         }
     }
 
+    public void reconnect() {
+        if (socket == null) {
+            connectListener.connectionAction(ConnectionStatus.NEW_CONNECTION);
+        }
+    }
+
     public void connect() {
         try {
             socket = new Socket(host, port);
@@ -85,10 +92,10 @@ public class ChatClient implements ResponseHandler{
             ServerListener serverListener = new ServerListener(inputStream, this);
             serverListenerThread = new Thread(serverListener);
             serverListenerThread.start();
-            connectListener.connectionAction(true);
+            connectListener.connectionAction(ConnectionStatus.CONNECTION_OK);
         } catch (IOException e) {
             logger.error("Не удалось подключиться к серверу.", e);
-            connectListener.connectionAction(false);
+            connectListener.connectionAction(ConnectionStatus.CONNECTION_ERROR);
         }
     }
 
@@ -140,6 +147,7 @@ public class ChatClient implements ResponseHandler{
             if (socket != null) {
                 mapper.writeValue(outputStream, new Request(RequestType.EXIT, ""));
                 socket.close();
+                socket = null;
             }
 
         } catch (SecurityException e) {

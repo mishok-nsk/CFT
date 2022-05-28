@@ -1,5 +1,6 @@
 package ru.cft.shift.task6.client.view;
 
+import ru.cft.shift.task6.client.model.ConnectListener;
 import ru.cft.shift.task6.client.model.MessageListener;
 import ru.cft.shift.task6.common.Message;
 
@@ -16,6 +17,7 @@ public class MainWindow extends JFrame implements MessageListener {
     private JTextArea clientArea;
     private SendMessageListener sendMessageListener;
     private ExitListener exitListener;
+    private ConnectionListener connectionListener;
 
     public MainWindow() {
         super("Chat client");
@@ -37,6 +39,10 @@ public class MainWindow extends JFrame implements MessageListener {
 
     public void setExitListener(ExitListener listener) {
         exitListener = listener;
+    }
+
+    public void setConnectionListener(ConnectionListener listener) {
+        connectionListener = listener;
     }
 
     public void sendMessage() {
@@ -77,11 +83,18 @@ public class MainWindow extends JFrame implements MessageListener {
         contentPane.add(messagePanel, BorderLayout.SOUTH);
         messageArea.getText();
 
+        JPanel connectionPanel = new JPanel();
+        GridBagLayout layout = new GridBagLayout();
+        connectionPanel.setLayout(layout);
+        connectionPanel.add(createConnectButton(layout));
+        connectionPanel.add(createDisconnectButton(layout));
+        contentPane.add(connectionPanel, BorderLayout.NORTH);
+
         JPanel chatPanel = new JPanel();
         chatPanel.setLayout(new BorderLayout());
 
         clientArea = new JTextArea();
-        clientArea.setPreferredSize(new Dimension(200, 300));
+        clientArea.setPreferredSize(new Dimension(120, 300));
         clientArea.setEnabled(false);
         clientArea.setDisabledTextColor(Color.BLACK);
         chatArea = new JTextArea();
@@ -94,6 +107,52 @@ public class MainWindow extends JFrame implements MessageListener {
         chatPanel.add(new JScrollPane(clientArea), BorderLayout.WEST);
         chatPanel.add(jScrollPane, BorderLayout.CENTER);
         contentPane.add(chatPanel, BorderLayout.CENTER);
+    }
+
+    private JButton createConnectButton(GridBagLayout layout) {
+        JButton connectButton = new JButton("Connect");
+        connectButton.setPreferredSize(new Dimension(100, 25));
+
+        connectButton.addActionListener(e -> {
+            if (connectionListener != null) {
+                connectionListener.setConnect(true);
+            }
+        });
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 1;
+        gbc.weightx = 0.5;
+        gbc.insets = new Insets(10, 0, 10, 0);
+        layout.setConstraints(connectButton, gbc);
+
+        return connectButton;
+    }
+
+    private JButton createDisconnectButton(GridBagLayout layout) {
+        JButton disconnectButton = new JButton("Disconnect");
+        disconnectButton.setPreferredSize(new Dimension(100, 25));
+
+        disconnectButton.addActionListener(e -> {
+            if (connectionListener != null) {
+                connectionListener.setConnect(false);
+            }
+        });
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 1;
+        gbc.weightx = 0.5;
+        gbc.insets = new Insets(10, 5, 10, 0);
+        layout.setConstraints(disconnectButton, gbc);
+
+        return disconnectButton;
     }
 
     @Override

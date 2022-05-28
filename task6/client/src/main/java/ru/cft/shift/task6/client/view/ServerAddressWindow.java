@@ -45,6 +45,10 @@ public class ServerAddressWindow extends JDialog {
         showYourself();
     }
 
+    public void showNewConnection() {
+        label.setText("Enter server address.");
+        showYourself();
+    }
     public void showYourself() {
         setLocationRelativeTo(getOwner());
         setVisible(true);

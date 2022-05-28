@@ -25,4 +25,12 @@ public class ChatClientController {
         chatClient.setHost(host);
         chatClient.connect();
     }
+
+    public void setConnect(boolean isConnect) {
+        if (isConnect) {
+            chatClient.reconnect();
+        } else {
+          chatClient.stop();
+        }
+    }
 }

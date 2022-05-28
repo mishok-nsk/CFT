@@ -24,16 +24,17 @@ public class WindowsManager {
     public void setChatClientController(ChatClientController controller) {
         mainWindow.setExitListener(controller::chatExit);
         mainWindow.setMessageListener(controller::sendMessage);
+        mainWindow.setConnectionListener(controller::setConnect);
         serverAddressWindow.setServerAddressListener(controller::hostEntered);
         userNameWindow.addUserNameListener(controller::userNameEntered);
     }
 
     public void attachChatClient(ChatClient chatClient) {
-        chatClient.setConnectListener(isConnect -> {
-            if (isConnect) {
-                userNameWindow.showYourself();
-            } else {
-                serverAddressWindow.showConnectionError();
+        chatClient.setConnectListener(status -> {
+            switch (status) {
+                case CONNECTION_OK -> userNameWindow.showYourself();
+                case CONNECTION_ERROR -> serverAddressWindow.showConnectionError();
+                case NEW_CONNECTION -> serverAddressWindow.showNewConnection();
             }
         });
         chatClient.setAuthorizationListener(userNameWindow::showAuthorizationResponse);
